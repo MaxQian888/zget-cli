@@ -1,0 +1,121 @@
+{
+	"name": "react-cli-quick-starter",
+	"version": "0.0.0",
+	"license": "MIT",
+	"bin": "dist/cli.js",
+	"type": "module",
+	"engines": {
+		"node": ">=20"
+	},
+	"scripts": {
+		"build": "tsc",
+		"ci:local": "pnpm test && pnpm test:docs:coverage && pnpm docs:check && pnpm build",
+		"dev": "tsc --watch",
+		"docs:generate": "tsx tools/docs/generate-docs.ts",
+		"docs:check": "tsx tools/docs/check-generated-docs.ts",
+		"lint:staged": "lint-staged",
+		"lint": "xo",
+		"format": "prettier --write .",
+		"format:check": "prettier --check .",
+		"prepare": "simple-git-hooks",
+		"test": "prettier --check . && xo",
+		"test:docs": "vitest run --config vitest.config.ts",
+		"test:docs:coverage": "vitest run --config vitest.config.ts --coverage.enabled"
+	},
+	"files": [
+		"dist"
+	],
+	"dependencies": {
+		"ink": "^6.8.0",
+		"meow": "^11.0.0",
+		"react": "^19.2.4"
+	},
+	"devDependencies": {
+		"@sindresorhus/tsconfig": "^3.0.1",
+		"@types/ink-testing-library": "1.0.4",
+		"@types/node": "^20.19.37",
+		"@types/react": "^19.2.14",
+		"@vdemedes/prettier-config": "^2.0.1",
+		"@vitest/coverage-v8": "4.1.0",
+		"chalk": "^5.2.0",
+		"eslint": "^8.57.1",
+		"eslint-config-xo-react": "^0.27.0",
+		"eslint-plugin-react": "^7.32.2",
+		"eslint-plugin-react-hooks": "^4.6.0",
+		"ink-testing-library": "4.0.0",
+		"lint-staged": "^16.4.0",
+		"prettier": "^2.8.7",
+		"simple-git-hooks": "^2.13.1",
+		"tsx": "4.21.0",
+		"typedoc": "0.28.17",
+		"typedoc-plugin-markdown": "4.10.0",
+		"typescript": "^5.0.3",
+		"vitest": "4.1.0",
+		"xo": "^0.53.1"
+	},
+	"xo": {
+		"extends": "xo-react",
+		"prettier": true,
+		"overrides": [
+			{
+				"files": [
+					"tools/**/*.ts",
+					"tests/**/*.ts",
+					"tests/**/*.tsx",
+					"vitest.config.ts"
+				],
+				"parserOptions": {
+					"project": "./tsconfig.tools.json"
+				},
+				"rules": {
+					"import/extensions": "off",
+					"n/file-extension-in-import": "off"
+				}
+			},
+			{
+				"files": [
+					"tools/**/*.ts"
+				],
+				"rules": {
+					"@typescript-eslint/no-unsafe-assignment": "off",
+					"@typescript-eslint/no-unsafe-call": "off",
+					"@typescript-eslint/no-unsafe-return": "off",
+					"@typescript-eslint/restrict-template-expressions": "off"
+				}
+			},
+			{
+				"files": [
+					"tests/**/*.ts",
+					"tests/**/*.tsx"
+				],
+				"rules": {
+					"@typescript-eslint/ban-types": "off",
+					"@typescript-eslint/no-unsafe-assignment": "off",
+					"@typescript-eslint/no-unsafe-call": "off",
+					"@typescript-eslint/no-unsafe-return": "off",
+					"@typescript-eslint/restrict-template-expressions": "off"
+				}
+			}
+		],
+		"rules": {
+			"react/prop-types": "off",
+			"react/react-in-jsx-scope": "off",
+			"react/jsx-uses-react": "off",
+			"unicorn/expiring-todo-comments": "off"
+		}
+	},
+	"simple-git-hooks": {
+		"commit-msg": "node tools/git-hooks/commit-msg-check.mjs \"$1\"",
+		"pre-commit": "pnpm lint:staged",
+		"pre-push": "pnpm ci:local"
+	},
+	"lint-staged": {
+		"*.{js,jsx,ts,tsx,mjs,cjs}": [
+			"xo"
+		],
+		"*.{json,md,yml,yaml}": [
+			"prettier --check"
+		]
+	},
+	"prettier": "@vdemedes/prettier-config"
+}

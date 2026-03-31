@@ -1,0 +1,19 @@
+# Dependencies
+/node_modules/
+
+# Build and test artifacts
+/dist/
+/coverage/
+
+# Local workflow state
+/openspec/
+
+# Package manager logs
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS-generated files
+.DS_Store
+Thumbs.db

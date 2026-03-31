@@ -1,0 +1,12 @@
+{
+	"$schema": "https://typedoc-plugin-markdown.org/schema.json",
+	"entryPoints": ["./source/index.ts"],
+	"entryPointStrategy": "resolve",
+	"tsconfig": "./tsconfig.json",
+	"plugin": ["typedoc-plugin-markdown"],
+	"out": "docs/reference/api",
+	"readme": "none",
+	"cleanOutputDir": true,
+	"hideGenerator": true,
+	"sourceLinkTemplate": "https://github.com/AstroAir/react-cli-quick-starter/blob/main/{path}#L{line}"
+}
