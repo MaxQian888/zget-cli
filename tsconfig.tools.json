@@ -1,8 +1,14 @@
 {
-	"extends": "./tsconfig.json",
+	"extends": "@sindresorhus/tsconfig",
 	"compilerOptions": {
 		"noEmit": true,
-		"types": ["node", "vitest/globals"]
+		"module": "esnext",
+		"moduleResolution": "node",
+		"jsx": "react-jsx",
+		"lib": ["es2022", "dom", "dom.iterable"],
+		"types": ["node", "vitest/globals"],
+		"verbatimModuleSyntax": false,
+		"noPropertyAccessFromIndexSignature": false
 	},
 	"include": [
 		"tools/**/*.ts",

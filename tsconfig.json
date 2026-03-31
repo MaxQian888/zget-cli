@@ -2,11 +2,13 @@
 	"extends": "@sindresorhus/tsconfig",
 	"compilerOptions": {
 		"outDir": "dist",
-		"module": "nodenext",
-		"moduleResolution": "nodenext",
+		"module": "esnext",
+		"moduleResolution": "bundler",
 		"jsx": "react-jsx",
-		"lib": ["es2022"],
-		"types": ["node"]
+		"lib": ["es2022", "dom", "dom.iterable"],
+		"types": ["node"],
+		"verbatimModuleSyntax": false,
+		"noPropertyAccessFromIndexSignature": false
 	},
 	"include": ["source"]
 }

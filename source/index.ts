@@ -1,9 +1,2 @@
-export {default as App} from './app.js';
-export {
-	buildCliHelpText,
-	cliName,
-	cliExamples,
-	cliFlags,
-	defaultName,
-} from './cli-metadata.js';
-export type {CliFlagDefinition} from './cli-metadata.js';
+export {default as App} from './app';
+export {cliName, cliFlags, buildCliHelpText} from './cli-metadata';

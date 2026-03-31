@@ -1,18 +1,18 @@
-[**react-cli-quick-starter**](../README.md)
+[**zget-cli**](../README.md)
 
 ***
 
-[react-cli-quick-starter](../README.md) / App
+[zget-cli](../README.md) / App
 
 # Function: App()
 
-> **App**(`props`): `Element`
+> **App**(`__namedParameters`): `Element`
 
-Defined in: [app.tsx:11](https://github.com/AstroAir/react-cli-quick-starter/blob/main/source/app.tsx#L11)
+Defined in: [app.tsx:28](https://github.com/AstroAir/react-cli-quick-starter/blob/main/source/app.tsx#L28)
 
 ## Parameters
 
-### props
+### \_\_namedParameters
 
 `Props`
 

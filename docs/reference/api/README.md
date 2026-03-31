@@ -1,19 +1,13 @@
-**react-cli-quick-starter**
+**zget-cli**
 
 ***
 
-# react-cli-quick-starter
-
-## Type Aliases
-
-- [CliFlagDefinition](type-aliases/CliFlagDefinition.md)
+# zget-cli
 
 ## Variables
 
-- [cliExamples](variables/cliExamples.md)
 - [cliFlags](variables/cliFlags.md)
 - [cliName](variables/cliName.md)
-- [defaultName](variables/defaultName.md)
 
 ## Functions
 

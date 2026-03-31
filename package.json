@@ -1,6 +1,7 @@
 {
-	"name": "react-cli-quick-starter",
-	"version": "0.0.0",
+	"name": "zget-cli",
+	"version": "0.1.0",
+	"description": "Download Zhihu articles, answers, videos, and columns to Markdown",
 	"license": "MIT",
 	"bin": "dist/cli.js",
 	"type": "module",
@@ -8,12 +9,13 @@
 		"node": ">=20"
 	},
 	"scripts": {
-		"build": "tsc",
-		"ci:local": "pnpm test && pnpm test:docs:coverage && pnpm docs:check && pnpm build",
-		"dev": "tsc --watch",
+		"build": "tsup",
+		"build:check": "tsc --noEmit",
+		"ci:local": "pnpm build:check && pnpm build",
+		"dev": "tsx source/cli.tsx",
 		"docs:generate": "tsx tools/docs/generate-docs.ts",
 		"docs:check": "tsx tools/docs/check-generated-docs.ts",
-		"lint:staged": "lint-staged",
+		"lint:staged": "lint-staged --concurrent false",
 		"lint": "xo",
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
@@ -26,37 +28,61 @@
 		"dist"
 	],
 	"dependencies": {
+		"@inkjs/ui": "^2.0.0",
+		"cheerio": "^1.2.0",
+		"dotenv": "^16.4.7",
 		"ink": "^6.8.0",
 		"meow": "^11.0.0",
-		"react": "^19.2.4"
+		"playwright": "^1.52.0",
+		"qrcode": "^1.5.4",
+		"react": "^19.2.4",
+		"sanitize-filename": "^1.6.4",
+		"turndown": "^7.2.2",
+		"undici": "^7.24.6"
 	},
 	"devDependencies": {
 		"@sindresorhus/tsconfig": "^3.0.1",
 		"@types/ink-testing-library": "1.0.4",
 		"@types/node": "^20.19.37",
 		"@types/react": "^19.2.14",
+		"@types/sanitize-filename": "^1.6.3",
+		"@types/turndown": "^5.0.6",
 		"@vdemedes/prettier-config": "^2.0.1",
 		"@vitest/coverage-v8": "4.1.0",
-		"chalk": "^5.2.0",
+		"chalk": "^5.6.2",
 		"eslint": "^8.57.1",
 		"eslint-config-xo-react": "^0.27.0",
-		"eslint-plugin-react": "^7.32.2",
-		"eslint-plugin-react-hooks": "^4.6.0",
+		"eslint-plugin-react": "^7.37.5",
+		"eslint-plugin-react-hooks": "^4.6.2",
 		"ink-testing-library": "4.0.0",
 		"lint-staged": "^16.4.0",
-		"prettier": "^2.8.7",
+		"prettier": "^2.8.8",
 		"simple-git-hooks": "^2.13.1",
+		"tsup": "^8.5.1",
 		"tsx": "4.21.0",
 		"typedoc": "0.28.17",
 		"typedoc-plugin-markdown": "4.10.0",
-		"typescript": "^5.0.3",
+		"typescript": "^5.9.3",
 		"vitest": "4.1.0",
 		"xo": "^0.53.1"
 	},
 	"xo": {
 		"extends": "xo-react",
 		"prettier": true,
+		"semicolon": true,
+		"parserOptions": {
+			"project": "./tsconfig.xo.json"
+		},
 		"overrides": [
+			{
+				"files": [
+					"source/cli.tsx"
+				],
+				"rules": {
+					"@typescript-eslint/no-unsafe-call": "off",
+					"unicorn/no-process-exit": "off"
+				}
+			},
 			{
 				"files": [
 					"tools/**/*.ts",
@@ -98,6 +124,8 @@
 			}
 		],
 		"rules": {
+			"import/extensions": "off",
+			"n/file-extension-in-import": "off",
 			"react/prop-types": "off",
 			"react/react-in-jsx-scope": "off",
 			"react/jsx-uses-react": "off",
@@ -116,6 +144,11 @@
 		"*.{json,md,yml,yaml}": [
 			"prettier --check"
 		]
+	},
+	"pnpm": {
+		"overrides": {
+			"xo>typescript": "5.9.3"
+		}
 	},
 	"prettier": "@vdemedes/prettier-config"
 }

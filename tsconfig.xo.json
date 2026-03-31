@@ -1,0 +1,14 @@
+{
+	"extends": "@sindresorhus/tsconfig",
+	"compilerOptions": {
+		"noEmit": true,
+		"module": "esnext",
+		"moduleResolution": "node",
+		"jsx": "react-jsx",
+		"lib": ["es2022", "dom", "dom.iterable"],
+		"types": ["node"],
+		"verbatimModuleSyntax": false,
+		"noPropertyAccessFromIndexSignature": false
+	},
+	"include": ["source", "tsup.config.ts"]
+}

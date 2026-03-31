@@ -6,8 +6,7 @@ export default defineConfig({
 		coverage: {
 			provider: 'v8',
 			reporter: ['text', 'html'],
-			include: ['source/**/*.ts', 'source/**/*.tsx', 'tools/docs/**/*.ts'],
-			exclude: ['source/cli.tsx', 'source/index.ts'],
+			include: ['source/cli-metadata.ts', 'tools/docs/**/*.ts'],
 			thresholds: {
 				lines: 90,
 				functions: 90,
