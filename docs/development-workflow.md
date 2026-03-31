@@ -27,7 +27,7 @@ pnpm test:docs
 pnpm docs:generate
 pnpm docs:check
 pnpm build
-node dist/cli.js --name=Jane
+node dist/cli.js --help
 ```
 
 ## Phase 4: Document
@@ -61,5 +61,5 @@ A change is considered complete when:
 ## Suggested Daily Command Set
 
 ```bash
-pnpm test && pnpm test:docs && pnpm docs:check && pnpm build && node dist/cli.js --name=Jane
+pnpm test && pnpm test:docs && pnpm docs:check && pnpm build && node dist/cli.js --help
 ```

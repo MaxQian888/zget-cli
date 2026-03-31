@@ -1,153 +1,294 @@
-# react-cli-quick-starter
+# zget
 
-A production-ready **React Ink CLI template** focused on maintainability, quality checks, and clear documentation architecture.
+A command-line tool that downloads articles, answers, videos, and social content from multiple Chinese and international platforms to Markdown files.
 
-[中文文档](./README_zh.md)
+## Supported Platforms
 
-## What This Template Includes
+| Platform            | Domain(s)                             |
+| ------------------- | ------------------------------------- |
+| 知乎 (Zhihu)        | `zhuanlan.zhihu.com`, `www.zhihu.com` |
+| CSDN                | `blog.csdn.net`                       |
+| 微信公众号 (WeChat) | `mp.weixin.qq.com`                    |
+| 掘金 (Juejin)       | `juejin.cn`                           |
+| X (Twitter)         | `x.com`, `twitter.com`                |
+| 小红书 (XHS)        | `xiaohongshu.com`, `xhslink.com`      |
+| 哔哩哔哩 (Bilibili) | `bilibili.com`, `b23.tv`              |
 
-- React Ink CLI baseline (`ink` + `meow`)
-- TypeScript compilation pipeline
-- Formatting and lint quality gates (`prettier` + `xo`)
-- GitHub Actions CI workflow (`.github/workflows/ci.yml`)
-- Built-in documentation architecture for onboarding and long-term project governance
+## Requirements
 
-## When To Use This Template
+- Node.js 20 or later
 
-Use this template when you want:
+## Installation
 
-- A terminal UI CLI based on React components
-- A clean starting point for command-driven tools
-- A template that already includes contribution, testing, and release conventions
-
-## Prerequisites
-
-- Node.js 20+
-- pnpm 8+ (recommended 10+)
-
-Install pnpm if needed:
-
-```bash
-npm install -g pnpm
+```sh
+npm install -g zget-cli
 ```
 
-## Quick Start
+## Usage
 
-```bash
+### Auto-detect from URL
+
+Paste any supported URL and zget detects the platform automatically:
+
+```sh
+zget <url>
+```
+
+**Examples:**
+
+```sh
+zget https://zhuanlan.zhihu.com/p/123456789
+zget https://blog.csdn.net/user/article/details/123456789
+zget https://mp.weixin.qq.com/s/xxxxxxxx
+zget https://juejin.cn/post/123456789
+zget https://x.com/user/status/123456789
+zget https://www.xiaohongshu.com/explore/abc123
+zget https://www.bilibili.com/video/BV1xxxx
+```
+
+---
+
+## Zhihu Commands
+
+### Download
+
+```sh
+zget article <url>              # Download a Zhihu article
+zget answer <url>               # Download a Zhihu answer
+zget video <url>                # Download a Zhihu video
+zget column <url>               # Download an entire column (batch)
+zget user <url|username>        # Download all content from a user (batch)
+```
+
+### Browse
+
+```sh
+zget search <query>             # Search Zhihu
+zget hot                        # Show trending topics (热榜)
+zget question <id>              # Show question details
+zget answers <question_id>      # List answers to a question
+zget feed                       # Show recommended feed
+zget topic <id>                 # Show topic details
+zget user-info <username>       # Show a user's profile
+zget user-answers <username>    # List a user's answers
+zget user-articles <username>   # List a user's articles
+```
+
+### Auth
+
+```sh
+zget login                      # Log in to Zhihu via QR code
+```
+
+---
+
+## X (Twitter) Commands
+
+### Auth
+
+```sh
+zget x login                    # Configure X API credentials
+```
+
+### Browse
+
+```sh
+zget x search <query>           # Search recent tweets
+zget x user <username>          # Show user profile
+zget x timeline <username>      # Show user's tweets
+zget x followers <username>     # List user's followers
+zget x following <username>     # List user's following
+zget x mentions                 # Show your mentions
+zget x bookmarks                # Show your bookmarks
+zget x metrics <tweet_id|url>   # Show tweet engagement metrics
+```
+
+### Download
+
+```sh
+zget x tweet <url>              # Download tweet as Markdown
+```
+
+### Interact
+
+```sh
+zget x post "<text>"                     # Post a new tweet
+zget x reply <id|url> -t "<text>"        # Reply to a tweet
+zget x quote <id|url> -t "<text>"        # Quote a tweet
+zget x delete <id|url>                   # Delete a tweet
+zget x like <id|url>                     # Like a tweet
+zget x retweet <id|url>                  # Retweet
+```
+
+---
+
+## 小红书 (XHS) Commands
+
+### Auth
+
+```sh
+zget xhs login                  # Log in via browser or cookie
+zget xhs whoami                 # Show current logged-in user
+zget xhs logout                 # Clear saved cookies
+```
+
+### Browse
+
+```sh
+zget xhs search <query>         # Search notes
+zget xhs read <note_id>         # Read a note's details
+zget xhs feed                   # Show recommended content
+zget xhs topics <query>         # Search topics
+zget xhs user <user_id>         # Show a user's profile
+zget xhs posts <user_id>        # List a user's notes
+zget xhs followers <user_id>    # List a user's followers
+zget xhs following <user_id>    # List a user's following
+zget xhs favorites              # Show your saved favorites
+```
+
+### Download
+
+```sh
+zget xhs <url>                  # Download note as Markdown (auto-detect)
+zget xhs download <note_id>     # Download note by ID
+```
+
+### Interact
+
+```sh
+zget xhs like <note_id>                     # Like a note
+zget xhs unlike <note_id>                   # Unlike a note
+zget xhs favorite <note_id>                 # Save a note to favorites
+zget xhs unfavorite <note_id>               # Remove from favorites
+zget xhs comment <note_id> -t "<text>"      # Comment on a note
+zget xhs delete <note_id>                   # Delete your note
+```
+
+### Publish
+
+```sh
+zget xhs post "<title>" --image photo.jpg
+```
+
+Use `--image` multiple times to attach several images. Use `--content "<body>"` for the post body.
+
+---
+
+## 哔哩哔哩 (Bilibili) Commands
+
+### Auth
+
+```sh
+zget bili login                 # Log in via QR code or cookie
+zget bili whoami                # Show current logged-in user
+zget bili logout                # Clear saved cookies
+```
+
+### Browse
+
+```sh
+zget bili search <query>        # Search videos
+zget bili video <bvid|url>      # Show video info and subtitles
+zget bili user <mid>            # Show a user's profile
+zget bili videos <mid>          # List a user's videos
+zget bili hot                   # Show popular videos
+zget bili ranking               # Show rankings
+zget bili related <bvid>        # Show related videos
+zget bili comments <bvid>       # Show video comments
+```
+
+### Download
+
+```sh
+zget bili <url>                 # Download video content as Markdown (auto-detect)
+zget bili download <bvid>       # Download by BV ID
+```
+
+### Interact
+
+```sh
+zget bili like <bvid>           # Like a video
+zget bili coin <bvid>           # Give coins to a video
+zget bili triple <bvid>         # Triple-click (like + coin + favorite)
+```
+
+---
+
+## AI Summary
+
+Summarize content from any supported URL:
+
+```sh
+zget summary <url>
+```
+
+zget reads AI credentials from `~/.zget-cli/ai-config.json` or from environment variables:
+
+| Variable            | Purpose                                                    |
+| ------------------- | ---------------------------------------------------------- |
+| `OPENAI_API_KEY`    | OpenAI API key                                             |
+| `ANTHROPIC_API_KEY` | Anthropic (Claude) API key                                 |
+| `DEEPSEEK_API_KEY`  | DeepSeek API key                                           |
+| `AI_API_KEY`        | Generic fallback key                                       |
+| `AI_PROVIDER`       | Force a provider: `openai`, `anthropic`, or `deepseek`     |
+| `AI_MODEL`          | Override the default model                                 |
+| `AI_BASE_URL`       | Override the API base URL (for OpenAI-compatible services) |
+
+Supported providers and their default models:
+
+| Provider  | Default model              |
+| --------- | -------------------------- |
+| OpenAI    | `gpt-4o-mini`              |
+| Anthropic | `claude-sonnet-4-20250514` |
+| DeepSeek  | `deepseek-chat`            |
+
+---
+
+## Options
+
+| Flag          | Short | Default       | Description                             |
+| ------------- | ----- | ------------- | --------------------------------------- |
+| `--output`    | `-o`  | `./downloads` | Output directory                        |
+| `--limit`     | `-l`  | `10`          | Max results for browse commands         |
+| `--format`    | `-f`  | `human`       | Output format: `human` or `json`        |
+| `--text`      | `-t`  |               | Text for post / reply / comment         |
+| `--verbose`   | `-v`  | `false`       | Verbose output                          |
+| `--resume`    |       | `true`        | Resume interrupted batch downloads      |
+| `--no-images` |       |               | Skip downloading images                 |
+| `--cookies`   |       |               | Cookie string (overrides saved cookies) |
+| `--image`     |       |               | Image path for XHS publish (repeatable) |
+| `--content`   |       |               | Body text for XHS publish               |
+
+---
+
+## Configuration Files
+
+All persistent data lives under `~/.zget-cli/`:
+
+| Path                 | Purpose                     |
+| -------------------- | --------------------------- |
+| `cookies.json`       | Zhihu session cookies       |
+| `x-credentials.json` | X (Twitter) API credentials |
+| `xhs-cookies.json`   | XHS session cookies         |
+| `xhs-tokens.json`    | XHS authentication tokens   |
+| `bili-cookies.json`  | Bilibili session cookies    |
+| `ai-config.json`     | AI provider configuration   |
+| `downloads/`         | Batch download resume state |
+
+---
+
+## Development
+
+```sh
 pnpm install
-pnpm build
-node dist/cli.js --name=Jane
+pnpm dev              # Run from source with tsx
+pnpm build            # Compile to dist/
+pnpm build:check      # TypeScript type check only
+pnpm lint             # XO linter
+pnpm format           # Prettier
+pnpm test             # lint + format check
 ```
-
-Expected output:
-
-```text
-Hello, Jane
-```
-
-## CLI Usage
-
-### Basic
-
-```bash
-node dist/cli.js
-```
-
-### With Option
-
-```bash
-node dist/cli.js --name=Jane
-```
-
-### Option Reference
-
-| Option          | Type      | Default    | Description                            |
-| --------------- | --------- | ---------- | -------------------------------------- |
-| `--name`        | `string`  | `Stranger` | Name used in greeting output           |
-| `--interactive` | `boolean` | `false`    | Enable interactive mode with key input |
-
-## Development Workflow
-
-1. Install dependencies: `pnpm install`
-2. Run watch mode while coding: `pnpm dev`
-3. Validate repository quality: `pnpm test`
-4. Validate docs pipeline: `pnpm test:docs && pnpm docs:check`
-5. Verify compilation output: `pnpm build`
-6. Smoke run built CLI: `node dist/cli.js --name=Jane`
-
-## Script Reference
-
-| Script                    | Purpose                                                     |
-| ------------------------- | ----------------------------------------------------------- |
-| `pnpm dev`                | TypeScript watch compile                                    |
-| `pnpm build`              | Compile source into `dist/`                                 |
-| `pnpm ci:local`           | Run the same quality/doc/build gate sequence as pre-push    |
-| `pnpm docs:generate`      | Regenerate committed reference docs under `docs/reference/` |
-| `pnpm docs:check`         | Fail if generated docs are stale or missing                 |
-| `pnpm lint:staged`        | Run pre-commit style checks only against staged files       |
-| `pnpm lint`               | Run XO lint checks                                          |
-| `pnpm format`             | Format all supported files with Prettier                    |
-| `pnpm format:check`       | Check formatting without modifying files                    |
-| `pnpm test`               | Run formatting check + lint checks                          |
-| `pnpm test:docs`          | Run docs pipeline and Ink rendering tests                   |
-| `pnpm test:docs:coverage` | Run docs tests with coverage thresholds                     |
-
-## Project Layout
-
-```text
-react-cli-quick-starter/
-├── source/
-│   ├── app.tsx                  # Ink UI component
-│   ├── cli-metadata.ts          # Shared CLI contract for runtime + docs
-│   └── cli.tsx                  # CLI entrypoint + argument parsing
-├── tests/
-│   ├── cli/
-│   └── docs/
-├── tools/
-│   └── docs/                    # Docs generation + freshness checks
-├── docs/
-│   ├── README.md                # Docs navigation hub
-│   ├── project-structure.md
-│   ├── development-workflow.md
-│   ├── cli-design.md
-│   ├── quality-gates.md
-│   ├── troubleshooting.md
-│   └── reference/
-│       ├── README.md
-│       ├── cli.md
-│       ├── tooling-baseline.md
-│       └── api/
-│   └── release-process.md
-├── .github/
-│   ├── workflows/ci.yml
-│   ├── PULL_REQUEST_TEMPLATE.md
-│   └── ISSUE_TEMPLATE/
-├── CONTRIBUTING.md
-├── TESTING.md
-├── CI_CD.md
-├── CHANGELOG.md
-├── package.json
-└── tsconfig.json
-```
-
-## Documentation Architecture
-
-- Docs hub: [docs/README.md](./docs/README.md)
-- Project map: [docs/project-structure.md](./docs/project-structure.md)
-- Development flow: [docs/development-workflow.md](./docs/development-workflow.md)
-- CLI design rules: [docs/cli-design.md](./docs/cli-design.md)
-- Quality gates: [docs/quality-gates.md](./docs/quality-gates.md)
-- Troubleshooting: [docs/troubleshooting.md](./docs/troubleshooting.md)
-- Reference docs: [docs/reference/README.md](./docs/reference/README.md)
-- Release process: [docs/release-process.md](./docs/release-process.md)
-
-## Governance Docs
-
-- Contribution policy: [CONTRIBUTING.md](./CONTRIBUTING.md)
-- Validation strategy: [TESTING.md](./TESTING.md)
-- CI/CD conventions: [CI_CD.md](./CI_CD.md)
-- Release history: [CHANGELOG.md](./CHANGELOG.md)
 
 ## License
 
-MIT. See [LICENSE](./LICENSE).
+MIT

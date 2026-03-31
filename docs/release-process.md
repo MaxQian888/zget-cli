@@ -1,6 +1,6 @@
 # Release Process
 
-This process defines how to cut stable versions from this template.
+This process defines how to cut stable versions of zget.
 
 ## Release Types
 
@@ -16,7 +16,7 @@ This process defines how to cut stable versions from this template.
 - [ ] `pnpm test:docs` passed
 - [ ] `pnpm docs:check` passed
 - [ ] `pnpm build` passed
-- [ ] Smoke run verified (`node dist/cli.js --name=Jane`)
+- [ ] Smoke run verified (`node dist/cli.js --help`)
 - [ ] README examples remain accurate
 
 ## Step-by-Step Release
@@ -29,7 +29,7 @@ pnpm test
 pnpm test:docs
 pnpm docs:check
 pnpm build
-node dist/cli.js --name=Jane
+node dist/cli.js --help
 ```
 
 3. Commit release prep:

@@ -37,5 +37,5 @@
 ## Smoke output is wrong
 
 - Rebuild with `pnpm build`.
-- Run `node dist/cli.js --name=Jane`.
+- Run `node dist/cli.js --help`.
 - If the output differs from docs or tests, update the shared CLI contract in `source/cli-metadata.ts` first.

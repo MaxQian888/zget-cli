@@ -1,0 +1,4 @@
+interface:
+  display_name: "Using zget CLI"
+  short_description: "Map content tasks to the right zget commands and auth flow."
+  default_prompt: "Use $using-zget-cli to choose the right zget command, auth prerequisites, and smoke checks for this task."

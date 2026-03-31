@@ -12,19 +12,19 @@ pnpm test:docs
 pnpm docs:generate
 pnpm docs:check
 pnpm build
-node dist/cli.js --name=Jane
+node dist/cli.js --help
 ```
 
 ## Gate Definitions
 
-| Gate              | Command                        | Purpose                                                                        |
-| ----------------- | ------------------------------ | ------------------------------------------------------------------------------ |
-| Formatting + lint | `pnpm test`                    | Validate repository style and static checks                                    |
-| Docs tests        | `pnpm test:docs`               | Validate docs helpers, generated markdown invariants, and Ink output contracts |
-| Docs coverage     | `pnpm test:docs:coverage`      | Enforce coverage thresholds for docs pipeline code                             |
-| Docs freshness    | `pnpm docs:check`              | Fail if committed generated docs drift from current source                     |
-| Build             | `pnpm build`                   | Ensure TypeScript compiles to `dist/`                                          |
-| Smoke             | `node dist/cli.js --name=Jane` | Validate built CLI behavior                                                    |
+| Gate              | Command                   | Purpose                                                                        |
+| ----------------- | ------------------------- | ------------------------------------------------------------------------------ |
+| Formatting + lint | `pnpm test`               | Validate repository style and static checks                                    |
+| Docs tests        | `pnpm test:docs`          | Validate docs helpers, generated markdown invariants, and Ink output contracts |
+| Docs coverage     | `pnpm test:docs:coverage` | Enforce coverage thresholds for docs pipeline code                             |
+| Docs freshness    | `pnpm docs:check`         | Fail if committed generated docs drift from current source                     |
+| Build             | `pnpm build`              | Ensure TypeScript compiles to `dist/`                                          |
+| Smoke             | `node dist/cli.js --help` | Validate built CLI behavior                                                    |
 
 ## CI Contract
 
