@@ -11,12 +11,12 @@ import type {ResolvedCommand} from './commands/types';
 const cliParserFlags = {
 	output: {
 		type: cliFlags.output.type,
-		shortFlag: 'o',
+		alias: 'o',
 		default: cliFlags.output.default,
 	},
 	verbose: {
 		type: cliFlags.verbose.type,
-		shortFlag: 'v',
+		alias: 'v',
 		default: cliFlags.verbose.default,
 	},
 	resume: {
@@ -33,17 +33,17 @@ const cliParserFlags = {
 	},
 	limit: {
 		type: 'number' as const,
-		shortFlag: 'l',
+		alias: 'l',
 		default: cliFlags.limit.default,
 	},
 	format: {
 		type: 'string' as const,
-		shortFlag: 'f',
+		alias: 'f',
 		default: cliFlags.format.default,
 	},
 	text: {
 		type: 'string' as const,
-		shortFlag: 't',
+		alias: 't',
 		default: cliFlags.text.default,
 	},
 	content: {
@@ -71,10 +71,56 @@ type RunCliOptions = {
 	readonly dependencies?: Partial<ResolveCommandDependencies>;
 };
 
-export function createCli(): CliInstance {
+const cliFlagEntries: Array<
+	[string, (typeof cliFlags)[keyof typeof cliFlags]]
+> = Object.entries(cliFlags);
+
+const cliLongFlagTokens = new Map(
+	cliFlagEntries.flatMap(([name, definition]) => {
+		const tokens: Array<[string, boolean]> = [
+			[`--${name}`, definition.type !== 'boolean'],
+		];
+		if (definition.type === 'boolean') {
+			tokens.push([`--no-${name}`, false]);
+		}
+
+		if ('shortFlag' in definition && typeof definition.shortFlag === 'string') {
+			const shortFlag = String(definition.shortFlag);
+			tokens.push(['-' + shortFlag, definition.type !== 'boolean']);
+		}
+
+		return tokens;
+	}),
+);
+
+function normalizeCliArgv(argv: string[]): string[] {
+	const normalizedArgv = argv[0] === '--' ? argv.slice(1) : argv;
+	const flagArgs: string[] = [];
+	const inputArgs: string[] = [];
+
+	for (let index = 0; index < normalizedArgv.length; index += 1) {
+		const token = normalizedArgv[index]!;
+		const flagDefinition = cliLongFlagTokens.get(token);
+		if (flagDefinition === undefined) {
+			inputArgs.push(token);
+			continue;
+		}
+
+		flagArgs.push(token);
+		if (flagDefinition && normalizedArgv[index + 1] !== undefined) {
+			flagArgs.push(normalizedArgv[index + 1]!);
+			index += 1;
+		}
+	}
+
+	return [...flagArgs, ...inputArgs];
+}
+
+export function createCli(argv = process.argv.slice(2)): CliInstance {
 	return meow<CliParserFlags>(buildCliHelpText(), {
 		importMeta: import.meta,
 		flags: cliParserFlags,
+		argv: normalizeCliArgv(argv),
 	});
 }
 

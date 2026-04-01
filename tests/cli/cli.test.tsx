@@ -1,7 +1,13 @@
+import process from 'node:process';
 import {pathToFileURL} from 'node:url';
 import {describe, expect, it, vi} from 'vitest';
 import type {ResolvedCommand} from '../../source/commands/types';
-import {isDirectExecution, resolveCommand, runCli} from '../../source/cli';
+import {
+	createCli,
+	isDirectExecution,
+	resolveCommand,
+	runCli,
+} from '../../source/cli';
 
 type CliInstance = Parameters<typeof resolveCommand>[0];
 
@@ -464,6 +470,56 @@ describe('resolveCommand', () => {
 		expect(stderrWrites.join('')).toContain(
 			'Supported: zhihu, csdn, weixin, juejin, x.com, xiaohongshu.com, bilibili.com URLs or use a subcommand',
 		);
+	});
+});
+
+describe('createCli', () => {
+	it('ignores the leading separator injected by pnpm dev passthrough', () => {
+		const originalArgv = process.argv;
+		process.argv = [
+			originalArgv[0] ?? 'node',
+			originalArgv[1] ?? 'source/cli.tsx',
+			'--',
+			'bili',
+			'hot',
+			'--format',
+			'json',
+			'--output',
+			'tmp-out',
+		];
+
+		try {
+			const cli = createCli();
+
+			expect(cli.input).toEqual(['bili', 'hot']);
+			expect(cli.flags.format).toBe('json');
+			expect(cli.flags.output).toBe('tmp-out');
+		} finally {
+			process.argv = originalArgv;
+		}
+	});
+
+	it('parses short global flags even when they appear after positional inputs', () => {
+		const originalArgv = process.argv;
+		process.argv = [
+			originalArgv[0] ?? 'node',
+			originalArgv[1] ?? 'source/cli.tsx',
+			'https://example.com/post',
+			'-o',
+			'tmp-out',
+			'-f',
+			'json',
+		];
+
+		try {
+			const cli = createCli();
+
+			expect(cli.input).toEqual(['https://example.com/post']);
+			expect(cli.flags.output).toBe('tmp-out');
+			expect(cli.flags.format).toBe('json');
+		} finally {
+			process.argv = originalArgv;
+		}
 	});
 });
 

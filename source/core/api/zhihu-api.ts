@@ -11,6 +11,13 @@ const zhihuApiV4 = 'https://www.zhihu.com/api/v4';
 const zhihuApiV3 = 'https://www.zhihu.com/api/v3';
 const zhihuBase = 'https://www.zhihu.com';
 const sortByKey = 'sort_by';
+const zhihuDetailHeaders = {
+	'x-requested-with': 'fetch',
+	'x-zse-93': '101_3_3.0',
+	'sec-fetch-dest': 'empty',
+	'sec-fetch-mode': 'cors',
+	'sec-fetch-site': 'same-origin',
+};
 
 export class ZhihuApi {
 	constructor(private readonly client: ApiClient) {}
@@ -132,10 +139,14 @@ export class ZhihuApi {
 
 	async getQuestion(questionId: string): Promise<Record<string, unknown>> {
 		const url = `${zhihuApiV4}/questions/${questionId}`;
-		return this.client.getJson<Record<string, unknown>>(url, {
-			include:
-				'data[*].author,answer_count,follower_count,visit_count,comment_count,created_time,updated_time,detail,topics',
-		});
+		return this.client.getJson<Record<string, unknown>>(
+			url,
+			{
+				include:
+					'data[*].author,answer_count,follower_count,visit_count,comment_count,created_time,updated_time,detail,topics',
+			},
+			zhihuDetailHeaders,
+		);
 	}
 
 	async getQuestionAnswers(
@@ -177,7 +188,11 @@ export class ZhihuApi {
 
 	async getTopic(topicId: string): Promise<Record<string, unknown>> {
 		const url = `${zhihuApiV4}/topics/${topicId}`;
-		return this.client.getJson<Record<string, unknown>>(url);
+		return this.client.getJson<Record<string, unknown>>(
+			url,
+			undefined,
+			zhihuDetailHeaders,
+		);
 	}
 
 	// --- Auth API ---

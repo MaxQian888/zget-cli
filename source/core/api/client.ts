@@ -15,6 +15,7 @@ export class ApiClient {
 	async getJson<T>(
 		url: string,
 		parameters?: Record<string, string>,
+		extraHeaders?: Record<string, string>,
 	): Promise<T> {
 		await this.throttle();
 		const fullUrl = new URL(url);
@@ -25,7 +26,7 @@ export class ApiClient {
 		}
 
 		const response = await fetch(fullUrl.toString(), {
-			headers: this.getHeaders(),
+			headers: {...this.getHeaders(), ...extraHeaders},
 		});
 
 		if (!response.ok) {
