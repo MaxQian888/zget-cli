@@ -27,10 +27,13 @@ This project follows:
 
 - Expanded template documentation to include detailed project governance
 - Added troubleshooting and quality gate documentation under `docs/`
+- Added automated tag-based release workflow for npm publishing and GitHub Release assets
+- Added conditional Docker-based `golangci-lint` CI for future Go modules
 
 ### Changed
 
 - Upgraded README and CONTRIBUTING content into executable workflow guides
+- Expanded CI to cover core and command suites, smoke checks, and npm packaging verification
 
 ## [0.0.0] - 2026-03-18
 

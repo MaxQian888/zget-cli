@@ -1,6 +1,7 @@
 import {Box, Text} from 'ink';
-import {useState, useEffect} from 'react';
+import {useState} from 'react';
 import {Spinner} from '@inkjs/ui';
+import {useRunOnceEffect} from '../core/utils/run-once-effect';
 import {XhsCookieStore} from '../core/auth/xhs-auth';
 import {XhsApi} from '../core/api/xhs-api';
 import {useInkApp} from '../core/utils/ink-app';
@@ -50,7 +51,9 @@ export default function XhsBrowseCommand({
 	const [title, setTitle] = useState('');
 	const [jsonOutput, setJsonOutput] = useState<string | undefined>();
 
-	useEffect(() => {
+	useRunOnceEffect(() => {
+		// Each browse mode maps a different API payload into terminal rows.
+		// eslint-disable-next-line complexity
 		const run = async () => {
 			let xhsApi: XhsApi | undefined;
 			try {
@@ -257,7 +260,7 @@ export default function XhsBrowseCommand({
 		};
 
 		void run();
-	}, []);
+	});
 
 	if (jsonOutput !== undefined) {
 		return <Text>{jsonOutput}</Text>;

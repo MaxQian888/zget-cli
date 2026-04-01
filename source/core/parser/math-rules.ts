@@ -3,16 +3,25 @@ import type TurndownService from 'turndown';
 export function addMathRules(turndown: TurndownService): void {
 	turndown.addRule('zhihu-math', {
 		filter(node) {
+			const element = node as HTMLSpanElement;
+			const formulaValue =
+				element.dataset?.tex ??
+				element.attributes.getNamedItem('data-tex')?.value;
+			const hasFormula = formulaValue !== undefined;
 			return (
 				node.nodeName === 'SPAN' &&
-				node.classList.contains('ztext-math') &&
-				Object.hasOwn(node.dataset, 'tex')
+				element.classList?.contains('ztext-math') &&
+				hasFormula
 			);
 		},
 		replacement(_content, node) {
-			const element = node;
+			const element = node as HTMLSpanElement;
 			// PR #41 fix: trim whitespace from formula
-			const formula = (element.dataset.tex ?? '').trim();
+			const formula = (
+				element.dataset?.tex ??
+				element.attributes.getNamedItem('data-tex')?.value ??
+				''
+			).trim();
 			if (!formula) return '';
 
 			// Block formula: contains \tag{}

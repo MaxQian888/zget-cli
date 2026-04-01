@@ -1,5 +1,6 @@
 import {Box, Text} from 'ink';
-import {useState, useEffect} from 'react';
+import {useState} from 'react';
+import {useRunOnceEffect} from '../core/utils/run-once-effect';
 import {useInkApp} from '../core/utils/ink-app';
 import {ApiClient} from '../core/api/client';
 import {ZhihuApi} from '../core/api/zhihu-api';
@@ -40,7 +41,7 @@ export default function ColumnCommand({url, flags}: Props) {
 	const [error, setError] = useState<string | undefined>();
 	const [summary, setSummary] = useState<string>('');
 
-	useEffect(() => {
+	useRunOnceEffect(() => {
 		const run = async () => {
 			try {
 				const cookieStore = new CookieStore();
@@ -99,7 +100,7 @@ export default function ColumnCommand({url, flags}: Props) {
 		};
 
 		void run();
-	}, []);
+	});
 
 	if (error) {
 		return (

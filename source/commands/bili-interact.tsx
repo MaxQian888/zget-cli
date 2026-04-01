@@ -1,6 +1,7 @@
 import {Box, Text} from 'ink';
-import {useState, useEffect} from 'react';
+import {useState} from 'react';
 import {Spinner} from '@inkjs/ui';
+import {useRunOnceEffect} from '../core/utils/run-once-effect';
 import {BiliCookieStore} from '../core/auth/bili-auth';
 import {BiliApi} from '../core/api/bili-api';
 import {useInkApp} from '../core/utils/ink-app';
@@ -30,7 +31,7 @@ export default function BiliInteractCommand({
 	const [message, setMessage] = useState('');
 	const [jsonOutput, setJsonOutput] = useState<string | undefined>();
 
-	useEffect(() => {
+	useRunOnceEffect(() => {
 		const run = async () => {
 			try {
 				const cookieStore = new BiliCookieStore();
@@ -86,7 +87,7 @@ export default function BiliInteractCommand({
 		};
 
 		void run();
-	}, []);
+	});
 
 	if (jsonOutput !== undefined) {
 		return <Text>{jsonOutput}</Text>;

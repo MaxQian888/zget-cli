@@ -1,5 +1,6 @@
 import {Box, Text} from 'ink';
-import {useState, useEffect} from 'react';
+import {useState} from 'react';
+import {useRunOnceEffect} from '../core/utils/run-once-effect';
 import {useInkApp} from '../core/utils/ink-app';
 import {ApiClient} from '../core/api/client';
 import {CookieStore} from '../core/auth/cookie-store';
@@ -61,7 +62,7 @@ export default function PlatformDownloadCommand({
 		juejin: '掘金',
 	};
 
-	useEffect(() => {
+	useRunOnceEffect(() => {
 		const run = async () => {
 			try {
 				const cookieStore = new CookieStore();
@@ -146,7 +147,7 @@ export default function PlatformDownloadCommand({
 		};
 
 		void run();
-	}, []);
+	});
 
 	const name = platformNames[platform] ?? platform;
 

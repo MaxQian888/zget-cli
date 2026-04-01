@@ -4,6 +4,7 @@
 # Build and test artifacts
 /dist/
 /coverage/
+/.artifacts/
 
 # Local workflow state
 /openspec/

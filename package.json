@@ -11,18 +11,29 @@
 	"scripts": {
 		"build": "tsup",
 		"build:check": "tsc --noEmit",
-		"ci:local": "pnpm build:check && pnpm build",
+		"ci:local": "pnpm test && pnpm test:components && pnpm test:core && pnpm test:commands && pnpm test:docs && pnpm docs:check && pnpm build:check && pnpm build && pnpm smoke && pnpm pack:check",
 		"dev": "tsx source/cli.tsx",
 		"docs:generate": "tsx tools/docs/generate-docs.ts",
 		"docs:check": "tsx tools/docs/check-generated-docs.ts",
 		"lint:staged": "lint-staged --concurrent false",
 		"lint": "xo",
+		"pack:check": "tsx tools/release/check-pack.ts",
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
 		"prepare": "simple-git-hooks",
+		"release:assert-version": "tsx tools/release/assert-release-version.ts",
+		"release:verify": "pnpm verify:ci",
+		"smoke": "node dist/cli.js --help",
 		"test": "prettier --check . && xo",
+		"test:commands": "vitest run --config vitest.commands.config.mjs",
+		"test:commands:coverage": "vitest run --config vitest.commands.config.mjs --coverage.enabled",
+		"test:components": "vitest run --config vitest.components.config.ts",
+		"test:components:coverage": "vitest run --config vitest.components.config.ts --coverage.enabled",
+		"test:core": "vitest run --config vitest.core.config.ts",
+		"test:core:coverage": "vitest run --config vitest.core.config.ts --coverage.enabled",
 		"test:docs": "vitest run --config vitest.config.ts",
-		"test:docs:coverage": "vitest run --config vitest.config.ts --coverage.enabled"
+		"test:docs:coverage": "vitest run --config vitest.config.ts --coverage.enabled",
+		"verify:ci": "pnpm test && pnpm test:components:coverage && pnpm test:core:coverage && pnpm test:commands:coverage && pnpm test:docs:coverage && pnpm docs:check && pnpm build:check && pnpm build && pnpm smoke && pnpm pack:check"
 	},
 	"files": [
 		"dist"
@@ -88,7 +99,7 @@
 					"tools/**/*.ts",
 					"tests/**/*.ts",
 					"tests/**/*.tsx",
-					"vitest.config.ts"
+					"vitest*.config.ts"
 				],
 				"parserOptions": {
 					"project": "./tsconfig.tools.json"
@@ -115,11 +126,24 @@
 					"tests/**/*.tsx"
 				],
 				"rules": {
+					"@typescript-eslint/naming-convention": "off",
 					"@typescript-eslint/ban-types": "off",
 					"@typescript-eslint/no-unsafe-assignment": "off",
 					"@typescript-eslint/no-unsafe-call": "off",
 					"@typescript-eslint/no-unsafe-return": "off",
-					"@typescript-eslint/restrict-template-expressions": "off"
+					"@typescript-eslint/restrict-template-expressions": "off",
+					"import/first": "off"
+				}
+			},
+			{
+				"files": [
+					"tests/source/commands/**/*.tsx"
+				],
+				"rules": {
+					"@typescript-eslint/no-empty-function": "off",
+					"@typescript-eslint/no-extraneous-class": "off",
+					"@typescript-eslint/promise-function-async": "off",
+					"no-constructor-return": "off"
 				}
 			}
 		],

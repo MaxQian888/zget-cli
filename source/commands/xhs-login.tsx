@@ -1,6 +1,7 @@
 import {Box, Text} from 'ink';
-import {useState, useEffect} from 'react';
+import {useState} from 'react';
 import {Spinner} from '@inkjs/ui';
+import {useRunOnceEffect} from '../core/utils/run-once-effect';
 import {XhsCookieStore} from '../core/auth/xhs-auth';
 import {XhsApi} from '../core/api/xhs-api';
 import {XhsBrowser} from '../core/api/xhs-browser';
@@ -31,7 +32,9 @@ export default function XhsLoginCommand({
 	);
 	const [jsonOutput, setJsonOutput] = useState<string | undefined>();
 
-	useEffect(() => {
+	useRunOnceEffect(() => {
+		// The XHS auth surface intentionally keeps the mode-specific flow explicit.
+		// eslint-disable-next-line complexity
 		const run = async () => {
 			try {
 				const cookieStore = new XhsCookieStore();
@@ -172,7 +175,7 @@ export default function XhsLoginCommand({
 		};
 
 		void run();
-	}, []);
+	});
 
 	if (jsonOutput !== undefined) {
 		return <Text>{jsonOutput}</Text>;

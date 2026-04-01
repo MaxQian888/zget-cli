@@ -25,6 +25,8 @@ type Props = {
 	readonly resolved: ResolvedCommand;
 };
 
+// The CLI dispatcher keeps the command-to-component routing explicit in one place.
+// eslint-disable-next-line complexity
 export default function App({resolved}: Props) {
 	const {command, url, flags, limit, text, format} = resolved;
 

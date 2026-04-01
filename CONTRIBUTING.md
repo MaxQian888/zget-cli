@@ -21,12 +21,18 @@ pnpm install
 
 - `commit-msg`: validates Conventional Commit format (`type(scope): summary`).
 - `pre-commit`: runs `pnpm lint:staged` (checks only staged files).
-- `pre-push`: runs `pnpm ci:local` (quality checks, docs coverage, docs freshness, and build).
+- `pre-push`: runs `pnpm ci:local` (local validation, smoke check, and packaging verification).
 
 If you need to run the pre-push gate manually:
 
 ```bash
 pnpm ci:local
+```
+
+If you need the same coverage-heavy gate that GitHub Actions and the release workflow use:
+
+```bash
+pnpm verify:ci
 ```
 
 To run the staged-files gate manually:
@@ -47,14 +53,13 @@ git checkout -b feat/<short-scope>
 3. Validate locally:
 
 ```bash
-pnpm test
-pnpm build
+pnpm ci:local
 ```
 
 4. Smoke test CLI:
 
 ```bash
-node dist/cli.js --name=Jane
+pnpm smoke
 ```
 
 5. Commit with clear scope and rationale.
@@ -98,7 +103,7 @@ A PR should include:
 
 - Problem statement
 - Scope of change
-- Validation evidence (`pnpm test`, `pnpm build`, smoke output)
+- Validation evidence (`pnpm ci:local` or targeted equivalents)
 - Docs updates (if behavior or workflow changed)
 
 Use `.github/PULL_REQUEST_TEMPLATE.md` as the baseline.
@@ -107,8 +112,7 @@ Use `.github/PULL_REQUEST_TEMPLATE.md` as the baseline.
 
 Before requesting review, confirm:
 
-- [ ] `pnpm test` passed
-- [ ] `pnpm build` passed
+- [ ] `pnpm ci:local` passed
 - [ ] CLI still runs from `dist/cli.js`
 - [ ] README/docs reflect the current behavior
 - [ ] No unrelated file churn

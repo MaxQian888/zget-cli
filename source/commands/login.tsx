@@ -1,6 +1,7 @@
 import {Box, Text} from 'ink';
-import {useState, useEffect} from 'react';
+import {useState} from 'react';
 import QRCode from 'qrcode';
+import {useRunOnceEffect} from '../core/utils/run-once-effect';
 import {performQrLogin} from '../core/auth/qr-login';
 import {useInkApp} from '../core/utils/ink-app';
 import QrCodeStatus from '../components/qr-code';
@@ -25,7 +26,7 @@ export default function LoginCommand({flags: _flags}: Props) {
 	const [qrLink, setQrLink] = useState<string>('');
 	const [errorMessage, setErrorMessage] = useState<string>('');
 
-	useEffect(() => {
+	useRunOnceEffect(() => {
 		const run = async () => {
 			try {
 				await performQrLogin({
@@ -58,7 +59,7 @@ export default function LoginCommand({flags: _flags}: Props) {
 		};
 
 		void run();
-	}, []);
+	});
 
 	return (
 		<Box flexDirection="column">

@@ -1,6 +1,7 @@
 import {Box, Text} from 'ink';
-import {useState, useEffect} from 'react';
+import {useState} from 'react';
 import {Spinner} from '@inkjs/ui';
+import {useRunOnceEffect} from '../core/utils/run-once-effect';
 import {XCredentialStore} from '../core/auth/x-auth';
 import {XApi} from '../core/api/x-api';
 import {useInkApp} from '../core/utils/ink-app';
@@ -38,7 +39,7 @@ export default function TwitterInteractCommand({
 	const [message, setMessage] = useState('');
 	const [jsonOutput, setJsonOutput] = useState<string | undefined>();
 
-	useEffect(() => {
+	useRunOnceEffect(() => {
 		const run = async () => {
 			try {
 				const credStore = new XCredentialStore();
@@ -120,7 +121,7 @@ export default function TwitterInteractCommand({
 		};
 
 		void run();
-	}, []);
+	});
 
 	if (jsonOutput !== undefined) {
 		return <Text>{jsonOutput}</Text>;

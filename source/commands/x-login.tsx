@@ -1,6 +1,7 @@
 import {Box, Text} from 'ink';
-import {useState, useEffect} from 'react';
+import {useState} from 'react';
 import {Spinner} from '@inkjs/ui';
+import {useRunOnceEffect} from '../core/utils/run-once-effect';
 import {XCredentialStore} from '../core/auth/x-auth';
 import {XApi} from '../core/api/x-api';
 import {useInkApp} from '../core/utils/ink-app';
@@ -19,7 +20,7 @@ export default function TwitterLoginCommand({flags: _flags}: Props) {
 	const [message, setMessage] = useState('');
 	const [userName, setUserName] = useState('');
 
-	useEffect(() => {
+	useRunOnceEffect(() => {
 		const run = async () => {
 			try {
 				const credStore = new XCredentialStore();
@@ -57,7 +58,7 @@ export default function TwitterLoginCommand({flags: _flags}: Props) {
 		};
 
 		void run();
-	}, []);
+	});
 
 	if (status === 'error') {
 		return (

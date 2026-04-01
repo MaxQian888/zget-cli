@@ -1,5 +1,6 @@
 import {Box, Text} from 'ink';
-import {useState, useEffect} from 'react';
+import {useState} from 'react';
+import {useRunOnceEffect} from '../core/utils/run-once-effect';
 import {useInkApp} from '../core/utils/ink-app';
 import {ApiClient} from '../core/api/client';
 import {ZhihuApi} from '../core/api/zhihu-api';
@@ -32,7 +33,7 @@ export default function DownloadCommand({type, url, flags}: Props) {
 	const [result, setResult] = useState<DownloadResult | undefined>();
 	const [error, setError] = useState<string | undefined>();
 
-	useEffect(() => {
+	useRunOnceEffect(() => {
 		const run = async () => {
 			try {
 				const cookieStore = new CookieStore();
@@ -76,7 +77,6 @@ export default function DownloadCommand({type, url, flags}: Props) {
 						parsed.questionId,
 						parsed.answerId,
 						api,
-						client,
 						options,
 					);
 				} else {
@@ -101,7 +101,7 @@ export default function DownloadCommand({type, url, flags}: Props) {
 		};
 
 		void run();
-	}, []);
+	});
 
 	if (error) {
 		return (

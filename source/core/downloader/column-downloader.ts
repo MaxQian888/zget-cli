@@ -83,7 +83,6 @@ export async function downloadColumn(
 					String(item.question.id),
 					itemId,
 					api,
-					client,
 					itemOptions,
 				);
 			} else if (item.type === 'zvideo') {

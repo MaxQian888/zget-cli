@@ -116,7 +116,6 @@ export async function downloadUserContent(
 				String(answer.question.id),
 				String(answer.id),
 				api,
-				client,
 				{...options, outputDir: userDir},
 			);
 

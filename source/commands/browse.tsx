@@ -1,6 +1,7 @@
 import {Box, Text} from 'ink';
-import {useState, useEffect} from 'react';
+import {useState} from 'react';
 import {Spinner} from '@inkjs/ui';
+import {useRunOnceEffect} from '../core/utils/run-once-effect';
 import {ApiClient} from '../core/api/client';
 import {ZhihuApi} from '../core/api/zhihu-api';
 import {CookieStore} from '../core/auth/cookie-store';
@@ -57,7 +58,9 @@ export default function BrowseCommand({
 	const [lines, setLines] = useState<Array<{key: string; value: string}>>([]);
 	const [title, setTitle] = useState('');
 
-	useEffect(() => {
+	useRunOnceEffect(() => {
+		// Each browse mode maps a different API payload into terminal rows.
+		// eslint-disable-next-line complexity
 		const run = async () => {
 			try {
 				const cookieStore = new CookieStore();
@@ -242,7 +245,7 @@ export default function BrowseCommand({
 		};
 
 		void run();
-	}, []);
+	});
 
 	if (error) {
 		return (

@@ -1,6 +1,7 @@
 import {Box, Text} from 'ink';
-import {useState, useEffect} from 'react';
+import {useState} from 'react';
 import {Spinner} from '@inkjs/ui';
+import {useRunOnceEffect} from '../core/utils/run-once-effect';
 import {AiConfigStore} from '../core/ai/ai-config';
 import {summarize} from '../core/ai/summarizer';
 import {extractContentForSummary} from '../core/ai/content-extractor';
@@ -28,7 +29,7 @@ export default function SummaryCommand({url, flags, format = 'human'}: Props) {
 	}>({model: '', platform: '', title: ''});
 	const [jsonOutput, setJsonOutput] = useState<string | undefined>();
 
-	useEffect(() => {
+	useRunOnceEffect(() => {
 		const run = async () => {
 			try {
 				// Step 1: Load AI config
@@ -103,7 +104,7 @@ export default function SummaryCommand({url, flags, format = 'human'}: Props) {
 		};
 
 		void run();
-	}, []);
+	});
 
 	if (jsonOutput !== undefined) {
 		return <Text>{jsonOutput}</Text>;

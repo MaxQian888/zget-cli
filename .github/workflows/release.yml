@@ -1,0 +1,73 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate release tag version
+        run: pnpm release:assert-version ${{ github.ref_name }}
+
+      - name: Run release verification gates
+        run: pnpm release:verify
+
+      - name: Pack npm artifact
+        run: |
+          mkdir -p .artifacts/npm .artifacts/dist
+          pnpm pack --out .artifacts/npm/%s-%v.tgz
+
+      - name: Archive dist output
+        run: |
+          tar -czf ".artifacts/dist/zget-cli-${GITHUB_REF_NAME}-dist.tar.gz" dist
+
+      - name: Publish package to npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          PACKAGE_VERSION="${GITHUB_REF_NAME#v}"
+          if npm view "${PACKAGE_NAME}@${PACKAGE_VERSION}" version > /dev/null 2>&1; then
+            echo "Package ${PACKAGE_NAME}@${PACKAGE_VERSION} already exists on npm. Skipping publish."
+          else
+            pnpm publish --access public --no-git-checks
+          fi
+
+      - name: Create or update GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TGZ_FILE=$(find .artifacts/npm -maxdepth 1 -type f -name '*.tgz' -print -quit)
+          DIST_FILE=$(find .artifacts/dist -maxdepth 1 -type f -name '*.tar.gz' -print -quit)
+          if gh release view "${GITHUB_REF_NAME}" > /dev/null 2>&1; then
+            gh release upload "${GITHUB_REF_NAME}" "$TGZ_FILE" "$DIST_FILE" --clobber
+          else
+            gh release create "${GITHUB_REF_NAME}" "$TGZ_FILE" "$DIST_FILE" --title "${GITHUB_REF_NAME}" --generate-notes
+          fi

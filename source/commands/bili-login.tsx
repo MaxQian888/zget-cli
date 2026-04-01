@@ -1,6 +1,7 @@
 import {Box, Text} from 'ink';
-import {useState, useEffect} from 'react';
+import {useState} from 'react';
 import {Spinner} from '@inkjs/ui';
+import {useRunOnceEffect} from '../core/utils/run-once-effect';
 import {BiliCookieStore, performBiliQrLogin} from '../core/auth/bili-auth';
 import {BiliApi} from '../core/api/bili-api';
 import {useInkApp} from '../core/utils/ink-app';
@@ -32,7 +33,7 @@ export default function BiliLoginCommand({
 	const [qrUrl, setQrUrl] = useState<string | undefined>();
 	const [scanStatus, setScanStatus] = useState<string>('');
 
-	useEffect(() => {
+	useRunOnceEffect(() => {
 		const run = async () => {
 			try {
 				const cookieStore = new BiliCookieStore();
@@ -142,7 +143,7 @@ export default function BiliLoginCommand({
 		};
 
 		void run();
-	}, []);
+	});
 
 	if (jsonOutput !== undefined) {
 		return <Text>{jsonOutput}</Text>;

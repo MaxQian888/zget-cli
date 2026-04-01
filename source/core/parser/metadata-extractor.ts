@@ -28,6 +28,60 @@ function extractDate($: CheerioAPI, selector: string): string {
 	return match ? match[0].replaceAll('-', '') : '';
 }
 
+type ZhihuInitialData = {
+	initialState?: {
+		entities?: {
+			zvideos?: Record<
+				string,
+				{
+					video?: {
+						playlist?: Record<string, {playUrl?: string}>;
+					};
+				}
+			>;
+		};
+	};
+};
+
+function extractPlayUrlFromPlaylist(
+	playlist: Record<string, {playUrl?: string}> | undefined,
+): string | undefined {
+	if (!playlist) {
+		return undefined;
+	}
+
+	for (const details of Object.values(playlist)) {
+		if (details.playUrl) {
+			return details.playUrl;
+		}
+	}
+
+	return undefined;
+}
+
+function extractVideoUrlFromInitialData(
+	rawInitialData: string,
+): string | undefined {
+	try {
+		const initialData = JSON.parse(rawInitialData) as ZhihuInitialData;
+		const zvideos = initialData.initialState?.entities?.zvideos;
+		if (!zvideos) {
+			return undefined;
+		}
+
+		for (const videoInfo of Object.values(zvideos)) {
+			const playUrl = extractPlayUrlFromPlaylist(videoInfo.video?.playlist);
+			if (playUrl) {
+				return playUrl;
+			}
+		}
+	} catch {
+		// Ignore parse errors
+	}
+
+	return undefined;
+}
+
 export function extractArticleMetadata(
 	html: string,
 	sourceUrl: string,
@@ -107,37 +161,7 @@ export function extractVideoMetadata(
 	let videoUrl: string | undefined;
 	const script = $('#js-initialData');
 	if (script.length > 0) {
-		try {
-			const initialData = JSON.parse(script.text()) as {
-				initialState?: {
-					entities?: {
-						zvideos?: Record<
-							string,
-							{
-								video?: {
-									playlist?: Record<string, {playUrl?: string}>;
-								};
-							}
-						>;
-					};
-				};
-			};
-			const zvideos = initialData.initialState?.entities?.zvideos;
-			if (zvideos) {
-				for (const videoInfo of Object.values(zvideos)) {
-					const playlist = videoInfo.video?.playlist;
-					if (playlist) {
-						for (const details of Object.values(playlist)) {
-							if (details.playUrl) {
-								videoUrl = details.playUrl;
-							}
-						}
-					}
-				}
-			}
-		} catch {
-			// Ignore parse errors
-		}
+		videoUrl = extractVideoUrlFromInitialData(script.text());
 	}
 
 	return {

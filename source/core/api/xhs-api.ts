@@ -296,6 +296,8 @@ export class XhsApi {
 		return current;
 	}
 
+	// The XHS page state is highly inconsistent across page versions, so this parser stays explicit.
+	// eslint-disable-next-line complexity
 	private parseNoteFromState(
 		state: Record<string, unknown>,
 		noteId: string,
@@ -389,39 +391,42 @@ export class XhsApi {
 			this.deepGet(state, 'search.notes') ??
 			[]) as Array<Record<string, unknown>>;
 
-		return items.slice(0, limit).map(item => {
-			const noteCard = (item.noteCard ?? item) as Record<string, unknown>;
-			const user = (noteCard.user ?? {}) as Record<string, unknown>;
-			const interactInfo = (noteCard.interactInfo ?? {}) as Record<
-				string,
-				unknown
-			>;
+		return items.slice(0, limit).map(
+			// eslint-disable-next-line complexity
+			item => {
+				const noteCard = (item.noteCard ?? item) as Record<string, unknown>;
+				const user = (noteCard.user ?? {}) as Record<string, unknown>;
+				const interactInfo = (noteCard.interactInfo ?? {}) as Record<
+					string,
+					unknown
+				>;
 
-			// Cache xsec_token if available
-			const xsecToken = String(item.xsec_token ?? '');
-			if (xsecToken) {
-				const nid = String(noteCard.noteId ?? noteCard.id ?? '');
-				if (nid) this.tokenCache.set(nid, xsecToken);
-			}
+				// Cache xsec_token if available
+				const xsecToken = String(item.xsec_token ?? '');
+				if (xsecToken) {
+					const nid = String(noteCard.noteId ?? noteCard.id ?? '');
+					if (nid) this.tokenCache.set(nid, xsecToken);
+				}
 
-			return {
-				noteId: String(noteCard.noteId ?? noteCard.id ?? ''),
-				title: String(noteCard.displayTitle ?? noteCard.title ?? ''),
-				description: String(noteCard.desc ?? ''),
-				user: {
-					userId: String(user.userId ?? user.id ?? ''),
-					nickname: String(user.nickname ?? user.name ?? ''),
-					avatar: String(user.avatar ?? ''),
-				},
-				likeCount: Number(interactInfo.likedCount ?? 0),
-				imageUrl: String(
-					noteCard.cover
-						? (noteCard.cover as Record<string, unknown>).urlDefault ?? ''
-						: '',
-				),
-				xsecToken,
-			};
-		});
+				return {
+					noteId: String(noteCard.noteId ?? noteCard.id ?? ''),
+					title: String(noteCard.displayTitle ?? noteCard.title ?? ''),
+					description: String(noteCard.desc ?? ''),
+					user: {
+						userId: String(user.userId ?? user.id ?? ''),
+						nickname: String(user.nickname ?? user.name ?? ''),
+						avatar: String(user.avatar ?? ''),
+					},
+					likeCount: Number(interactInfo.likedCount ?? 0),
+					imageUrl: String(
+						noteCard.cover
+							? (noteCard.cover as Record<string, unknown>).urlDefault ?? ''
+							: '',
+					),
+					xsecToken,
+				};
+			},
+		);
 	}
 
 	private parseFeedItems(
@@ -432,37 +437,40 @@ export class XhsApi {
 			this.deepGet(state, 'homefeed.feeds') ??
 			[]) as Array<Record<string, unknown>>;
 
-		return items.slice(0, limit).map(item => {
-			const noteCard = (item.noteCard ?? item) as Record<string, unknown>;
-			const user = (noteCard.user ?? {}) as Record<string, unknown>;
-			const interactInfo = (noteCard.interactInfo ?? {}) as Record<
-				string,
-				unknown
-			>;
+		return items.slice(0, limit).map(
+			// eslint-disable-next-line complexity
+			item => {
+				const noteCard = (item.noteCard ?? item) as Record<string, unknown>;
+				const user = (noteCard.user ?? {}) as Record<string, unknown>;
+				const interactInfo = (noteCard.interactInfo ?? {}) as Record<
+					string,
+					unknown
+				>;
 
-			const xsecToken = String(item.xsec_token ?? '');
-			if (xsecToken) {
-				const nid = String(noteCard.noteId ?? noteCard.id ?? '');
-				if (nid) this.tokenCache.set(nid, xsecToken);
-			}
+				const xsecToken = String(item.xsec_token ?? '');
+				if (xsecToken) {
+					const nid = String(noteCard.noteId ?? noteCard.id ?? '');
+					if (nid) this.tokenCache.set(nid, xsecToken);
+				}
 
-			return {
-				noteId: String(noteCard.noteId ?? noteCard.id ?? ''),
-				title: String(noteCard.displayTitle ?? noteCard.title ?? ''),
-				description: String(noteCard.desc ?? ''),
-				user: {
-					userId: String(user.userId ?? user.id ?? ''),
-					nickname: String(user.nickname ?? user.name ?? ''),
-				},
-				likeCount: Number(interactInfo.likedCount ?? 0),
-				imageUrl: String(
-					noteCard.cover
-						? (noteCard.cover as Record<string, unknown>).urlDefault ?? ''
-						: '',
-				),
-				xsecToken,
-			};
-		});
+				return {
+					noteId: String(noteCard.noteId ?? noteCard.id ?? ''),
+					title: String(noteCard.displayTitle ?? noteCard.title ?? ''),
+					description: String(noteCard.desc ?? ''),
+					user: {
+						userId: String(user.userId ?? user.id ?? ''),
+						nickname: String(user.nickname ?? user.name ?? ''),
+					},
+					likeCount: Number(interactInfo.likedCount ?? 0),
+					imageUrl: String(
+						noteCard.cover
+							? (noteCard.cover as Record<string, unknown>).urlDefault ?? ''
+							: '',
+					),
+					xsecToken,
+				};
+			},
+		);
 	}
 
 	private parseTopics(state: Record<string, unknown>): XhsTopic[] {

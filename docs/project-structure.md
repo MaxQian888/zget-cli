@@ -87,6 +87,7 @@ Repository automation scripts.
 
 - `tools/docs/` — Docs generation entrypoints and diff detection
 - `tools/git-hooks/` — Commit message validation
+- `tools/release/` — Release tag validation and npm pack verification
 
 ### `docs/`
 
@@ -102,6 +103,7 @@ Architecture and process documentation.
 Repository collaboration and automation assets.
 
 - CI workflow
+- Release workflow
 - Pull request template
 
 ### `.agents/`

@@ -1,6 +1,7 @@
 import {Box, Text} from 'ink';
-import {useState, useEffect} from 'react';
+import {useState} from 'react';
 import {Spinner} from '@inkjs/ui';
+import {useRunOnceEffect} from '../core/utils/run-once-effect';
 import {useInkApp} from '../core/utils/ink-app';
 import {XhsCookieStore} from '../core/auth/xhs-auth';
 import {XhsApi} from '../core/api/xhs-api';
@@ -28,7 +29,7 @@ export default function XhsPublishCommand({
 	const [resultMessage, setResultMessage] = useState('');
 	const [jsonOutput, setJsonOutput] = useState<string | undefined>();
 
-	useEffect(() => {
+	useRunOnceEffect(() => {
 		const run = async () => {
 			let xhsApi: XhsApi | undefined;
 			try {
@@ -67,7 +68,7 @@ export default function XhsPublishCommand({
 		};
 
 		void run();
-	}, []);
+	});
 
 	if (jsonOutput !== undefined) {
 		return <Text>{jsonOutput}</Text>;

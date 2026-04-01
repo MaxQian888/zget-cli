@@ -1,57 +1,82 @@
 import process from 'node:process';
-import meow from 'meow';
+import {resolve as resolvePath} from 'node:path';
+import {pathToFileURL} from 'node:url';
+import meow, {type Result} from 'meow';
 import {render} from 'ink';
 import App from './app';
 import {buildCliHelpText, cliFlags} from './cli-metadata';
-import {parseUrl} from './core/utils/url-parser';
+import {parseUrl, type ParsedUrl} from './core/utils/url-parser';
 import type {ResolvedCommand} from './commands/types';
 
-const cli = meow(buildCliHelpText(), {
-	importMeta: import.meta,
-	flags: {
-		output: {
-			type: cliFlags.output.type,
-			shortFlag: 'o',
-			default: cliFlags.output.default,
-		},
-		verbose: {
-			type: cliFlags.verbose.type,
-			shortFlag: 'v',
-			default: cliFlags.verbose.default,
-		},
-		resume: {
-			type: cliFlags.resume.type,
-			default: cliFlags.resume.default,
-		},
-		images: {
-			type: cliFlags.images.type,
-			default: cliFlags.images.default,
-		},
-		cookies: {
-			type: cliFlags.cookies.type,
-			default: cliFlags.cookies.default,
-		},
-		limit: {
-			type: 'number' as const,
-			shortFlag: 'l',
-			default: cliFlags.limit.default,
-		},
-		format: {
-			type: 'string' as const,
-			shortFlag: 'f',
-			default: cliFlags.format.default,
-		},
-		text: {
-			type: 'string' as const,
-			shortFlag: 't',
-			default: cliFlags.text.default,
-		},
-		content: {
-			type: 'string' as const,
-			default: cliFlags.content.default,
-		},
+const cliParserFlags = {
+	output: {
+		type: cliFlags.output.type,
+		shortFlag: 'o',
+		default: cliFlags.output.default,
 	},
-});
+	verbose: {
+		type: cliFlags.verbose.type,
+		shortFlag: 'v',
+		default: cliFlags.verbose.default,
+	},
+	resume: {
+		type: cliFlags.resume.type,
+		default: cliFlags.resume.default,
+	},
+	images: {
+		type: cliFlags.images.type,
+		default: cliFlags.images.default,
+	},
+	cookies: {
+		type: cliFlags.cookies.type,
+		default: cliFlags.cookies.default,
+	},
+	limit: {
+		type: 'number' as const,
+		shortFlag: 'l',
+		default: cliFlags.limit.default,
+	},
+	format: {
+		type: 'string' as const,
+		shortFlag: 'f',
+		default: cliFlags.format.default,
+	},
+	text: {
+		type: 'string' as const,
+		shortFlag: 't',
+		default: cliFlags.text.default,
+	},
+	content: {
+		type: 'string' as const,
+		default: cliFlags.content.default,
+	},
+};
+
+type CliParserFlags = typeof cliParserFlags;
+
+export type CliInstance = Pick<
+	Result<CliParserFlags>,
+	'input' | 'flags' | 'showHelp'
+>;
+
+type ResolveCommandDependencies = {
+	parseUrl: (input: string) => ParsedUrl;
+	stderr: Pick<typeof process.stderr, 'write'>;
+	exit: (code: number) => never;
+};
+
+type RunCliOptions = {
+	readonly cli?: CliInstance;
+	readonly renderApp?: (tree: Parameters<typeof render>[0]) => unknown;
+	readonly dependencies?: Partial<ResolveCommandDependencies>;
+};
+
+export function createCli(): CliInstance {
+	return meow<CliParserFlags>(buildCliHelpText(), {
+		importMeta: import.meta,
+		flags: cliParserFlags,
+	});
+}
 
 const downloadCommands = new Set([
 	'article',
@@ -75,7 +100,25 @@ const browseCommands = new Set([
 	'user-articles',
 ]);
 
-function resolveCommand(): ResolvedCommand {
+function exitWithError(
+	message: string,
+	stderr: Pick<typeof process.stderr, 'write'>,
+	exit: (code: number) => never,
+): never {
+	stderr.write(message);
+	return exit(1);
+}
+
+// The CLI routes many command families in one place, so keeping this dispatcher
+// explicit is clearer than splitting it into indirection-heavy helpers.
+// eslint-disable-next-line complexity
+export function resolveCommand(
+	cli: CliInstance,
+	dependencies: Partial<ResolveCommandDependencies> = {},
+): ResolvedCommand {
+	const stderr = dependencies.stderr ?? process.stderr;
+	const exit = dependencies.exit ?? process.exit;
+	const parseUrlImpl = dependencies.parseUrl ?? parseUrl;
 	const {
 		output,
 		verbose,
@@ -111,10 +154,11 @@ function resolveCommand(): ResolvedCommand {
 	// --- X (Twitter) commands ---
 	if (first === 'x') {
 		if (!second) {
-			process.stderr.write(
+			exitWithError(
 				'Error: x requires a subcommand (search, user, post, tweet, login, etc.)\n',
+				stderr,
+				exit,
 			);
-			process.exit(1);
 		}
 
 		const xCommandMap: Record<string, ResolvedCommand['command']> = {
@@ -138,8 +182,7 @@ function resolveCommand(): ResolvedCommand {
 
 		const cmd = xCommandMap[second];
 		if (!cmd) {
-			process.stderr.write(`Error: unknown x subcommand: ${second}\n`);
-			process.exit(1);
+			exitWithError(`Error: unknown x subcommand: ${second}\n`, stderr, exit);
 		}
 
 		// Commands that need no argument
@@ -149,8 +192,7 @@ function resolveCommand(): ResolvedCommand {
 			'login',
 		]);
 		if (!xCommandsWithoutArguments.has(second) && !third && second !== 'post') {
-			process.stderr.write(`Error: x ${second} requires an argument\n`);
-			process.exit(1);
+			exitWithError(`Error: x ${second} requires an argument\n`, stderr, exit);
 		}
 
 		return {
@@ -167,10 +209,11 @@ function resolveCommand(): ResolvedCommand {
 	// --- Bilibili commands ---
 	if (first === 'bili') {
 		if (!second) {
-			process.stderr.write(
+			exitWithError(
 				'Error: bili requires a subcommand (search, video, hot, login, etc.)\n',
+				stderr,
+				exit,
 			);
-			process.exit(1);
 		}
 
 		const biliCommandMap: Record<string, ResolvedCommand['command']> = {
@@ -194,13 +237,16 @@ function resolveCommand(): ResolvedCommand {
 		const cmd = biliCommandMap[second];
 		if (!cmd) {
 			// Maybe it's a URL: bili https://bilibili.com/video/BVxxx
-			const parsed = parseUrl(second);
+			const parsed = parseUrlImpl(second);
 			if (parsed.platform === 'bili' && parsed.type === 'video') {
 				return {command: 'bili-download', url: parsed.bvid, flags, format};
 			}
 
-			process.stderr.write(`Error: unknown bili subcommand: ${second}\n`);
-			process.exit(1);
+			exitWithError(
+				`Error: unknown bili subcommand: ${second}\n`,
+				stderr,
+				exit,
+			);
 		}
 
 		const biliCommandsWithoutArguments = new Set([
@@ -211,8 +257,11 @@ function resolveCommand(): ResolvedCommand {
 			'logout',
 		]);
 		if (!biliCommandsWithoutArguments.has(second) && !third) {
-			process.stderr.write(`Error: bili ${second} requires an argument\n`);
-			process.exit(1);
+			exitWithError(
+				`Error: bili ${second} requires an argument\n`,
+				stderr,
+				exit,
+			);
 		}
 
 		return {
@@ -229,8 +278,7 @@ function resolveCommand(): ResolvedCommand {
 	// --- AI Summary ---
 	if (first === 'summary') {
 		if (!second) {
-			process.stderr.write('Error: summary requires a URL argument\n');
-			process.exit(1);
+			exitWithError('Error: summary requires a URL argument\n', stderr, exit);
 		}
 
 		return {command: 'summary', url: second, flags, format};
@@ -239,10 +287,11 @@ function resolveCommand(): ResolvedCommand {
 	// --- XHS (Xiaohongshu) commands ---
 	if (first === 'xhs') {
 		if (!second) {
-			process.stderr.write(
+			exitWithError(
 				'Error: xhs requires a subcommand (search, read, login, etc.)\n',
+				stderr,
+				exit,
 			);
-			process.exit(1);
 		}
 
 		const xhsCommandMap: Record<string, ResolvedCommand['command']> = {
@@ -271,13 +320,12 @@ function resolveCommand(): ResolvedCommand {
 		const cmd = xhsCommandMap[second];
 		if (!cmd) {
 			// Maybe it's a URL: xhs https://xiaohongshu.com/explore/xxx
-			const parsed = parseUrl(second);
+			const parsed = parseUrlImpl(second);
 			if (parsed.platform === 'xhs' && parsed.type === 'note') {
 				return {command: 'xhs-download', url: parsed.noteId, flags, format};
 			}
 
-			process.stderr.write(`Error: unknown xhs subcommand: ${second}\n`);
-			process.exit(1);
+			exitWithError(`Error: unknown xhs subcommand: ${second}\n`, stderr, exit);
 		}
 
 		const xhsCommandsWithoutArguments = new Set([
@@ -288,8 +336,11 @@ function resolveCommand(): ResolvedCommand {
 			'logout',
 		]);
 		if (!xhsCommandsWithoutArguments.has(second) && !third) {
-			process.stderr.write(`Error: xhs ${second} requires an argument\n`);
-			process.exit(1);
+			exitWithError(
+				`Error: xhs ${second} requires an argument\n`,
+				stderr,
+				exit,
+			);
 		}
 
 		return {
@@ -307,8 +358,7 @@ function resolveCommand(): ResolvedCommand {
 	if (browseCommands.has(first)) {
 		const browseCommandsWithoutArguments = new Set(['hot', 'feed']);
 		if (!browseCommandsWithoutArguments.has(first) && !second) {
-			process.stderr.write(`Error: ${first} requires an argument\n`);
-			process.exit(1);
+			exitWithError(`Error: ${first} requires an argument\n`, stderr, exit);
 		}
 
 		return {
@@ -322,8 +372,7 @@ function resolveCommand(): ResolvedCommand {
 	// Download commands with explicit subcommand
 	if (downloadCommands.has(first)) {
 		if (!second) {
-			process.stderr.write(`Error: ${first} requires a URL argument\n`);
-			process.exit(1);
+			exitWithError(`Error: ${first} requires a URL argument\n`, stderr, exit);
 		}
 
 		return {
@@ -335,7 +384,7 @@ function resolveCommand(): ResolvedCommand {
 	}
 
 	// Auto-detect from URL
-	const parsed = parseUrl(first);
+	const parsed = parseUrlImpl(first);
 	if (parsed.platform !== 'unknown') {
 		switch (parsed.platform) {
 			case 'zhihu': {
@@ -409,12 +458,33 @@ function resolveCommand(): ResolvedCommand {
 		}
 	}
 
-	process.stderr.write(`Error: Could not detect content type from: ${first}\n`);
-	process.stderr.write(
+	stderr.write(`Error: Could not detect content type from: ${first}\n`);
+	stderr.write(
 		'Supported: zhihu, csdn, weixin, juejin, x.com, xiaohongshu.com, bilibili.com URLs or use a subcommand\n',
 	);
-	process.exit(1);
+	return exit(1);
 }
 
-const resolved = resolveCommand();
-render(<App resolved={resolved} />);
+export function runCli({
+	cli = createCli(),
+	renderApp,
+	dependencies,
+}: RunCliOptions = {}) {
+	const resolved = resolveCommand(cli, dependencies);
+	return (renderApp ?? render)(<App resolved={resolved} />) as unknown;
+}
+
+export function isDirectExecution(
+	argv = process.argv,
+	metaUrl = import.meta.url,
+): boolean {
+	const entryPoint = argv[1];
+	return (
+		entryPoint !== undefined &&
+		pathToFileURL(resolvePath(entryPoint)).href === metaUrl
+	);
+}
+
+if (isDirectExecution()) {
+	runCli();
+}

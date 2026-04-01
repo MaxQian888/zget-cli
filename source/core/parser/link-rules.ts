@@ -27,7 +27,11 @@ export function addLinkRules(turndown: TurndownService): void {
 				// Not a valid URL, keep as-is
 			}
 
-			const linkText = element.dataset.text ?? (content || href);
+			const linkText =
+				element.dataset?.text ??
+				element.attributes.getNamedItem('data-text')?.value ??
+				content ??
+				href;
 			return `[${linkText}](${href})`;
 		},
 	});

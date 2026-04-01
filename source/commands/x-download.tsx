@@ -1,5 +1,6 @@
 import {Box, Text} from 'ink';
-import {useState, useEffect} from 'react';
+import {useState} from 'react';
+import {useRunOnceEffect} from '../core/utils/run-once-effect';
 import {useInkApp} from '../core/utils/ink-app';
 import {XCredentialStore} from '../core/auth/x-auth';
 import {XApi} from '../core/api/x-api';
@@ -27,7 +28,7 @@ export default function TwitterDownloadCommand({url, flags}: Props) {
 	const [result, setResult] = useState<DownloadResult | undefined>();
 	const [error, setError] = useState<string | undefined>();
 
-	useEffect(() => {
+	useRunOnceEffect(() => {
 		const run = async () => {
 			try {
 				const credStore = new XCredentialStore();
@@ -53,7 +54,7 @@ export default function TwitterDownloadCommand({url, flags}: Props) {
 		};
 
 		void run();
-	}, []);
+	});
 
 	if (error) {
 		return (

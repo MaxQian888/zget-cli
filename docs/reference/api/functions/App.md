@@ -8,7 +8,7 @@
 
 > **App**(`__namedParameters`): `Element`
 
-Defined in: [app.tsx:28](https://github.com/AstroAir/react-cli-quick-starter/blob/main/source/app.tsx#L28)
+Defined in: [app.tsx:30](https://github.com/AstroAir/react-cli-quick-starter/blob/main/source/app.tsx#L30)
 
 ## Parameters
 

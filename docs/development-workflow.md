@@ -22,12 +22,13 @@ pnpm dev
 Run checks in this order:
 
 ```bash
-pnpm test
-pnpm test:docs
-pnpm docs:generate
-pnpm docs:check
-pnpm build
-node dist/cli.js --help
+pnpm ci:local
+```
+
+Before pushing a release tag, run the full CI parity gate:
+
+```bash
+pnpm verify:ci
 ```
 
 ## Phase 4: Document
@@ -50,16 +51,13 @@ If behavior changed, update at least one of:
 
 A change is considered complete when:
 
-- `pnpm test` passes
-- `pnpm test:docs` passes
-- `pnpm docs:check` passes
-- `pnpm build` passes
-- Smoke run returns expected behavior
+- `pnpm ci:local` passes
+- `pnpm verify:ci` passes before a release tag
 - Related docs are updated
 - CI passes on PR
 
 ## Suggested Daily Command Set
 
 ```bash
-pnpm test && pnpm test:docs && pnpm docs:check && pnpm build && node dist/cli.js --help
+pnpm ci:local
 ```

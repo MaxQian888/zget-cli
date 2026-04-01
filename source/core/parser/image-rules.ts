@@ -25,6 +25,12 @@ export function addImageRules(
 		filter: 'img',
 		replacement(_content, node) {
 			const element = node as HTMLImageElement;
+			const dataset = element.dataset ?? {};
+			const dataSrc = element.attributes.getNamedItem('data-src')?.value;
+			const dataOriginal =
+				element.attributes.getNamedItem('data-original')?.value;
+			const dataActualSrc =
+				element.attributes.getNamedItem('data-actualsrc')?.value;
 
 			// Try all possible image source attributes across platforms:
 			// - data-src: WeChat (微信公众号) primary image source
@@ -32,9 +38,12 @@ export function addImageRules(
 			// - data-actualsrc: Zhihu actual source
 			// - src: standard fallback
 			const src =
-				element.dataset.src ??
-				element.dataset.original ??
-				element.dataset.actualsrc ??
+				dataset.src ??
+				dataSrc ??
+				dataset.original ??
+				dataOriginal ??
+				dataset.actualsrc ??
+				dataActualSrc ??
 				element.getAttribute('src') ??
 				'';
 

@@ -1,5 +1,6 @@
 import {Box, Text} from 'ink';
-import {useState, useEffect} from 'react';
+import {useState} from 'react';
+import {useRunOnceEffect} from '../core/utils/run-once-effect';
 import {useInkApp} from '../core/utils/ink-app';
 import {BiliCookieStore} from '../core/auth/bili-auth';
 import {BiliApi} from '../core/api/bili-api';
@@ -27,7 +28,7 @@ export default function BiliDownloadCommand({bvid, flags}: Props) {
 	const [result, setResult] = useState<DownloadResult | undefined>();
 	const [error, setError] = useState<string | undefined>();
 
-	useEffect(() => {
+	useRunOnceEffect(() => {
 		const run = async () => {
 			try {
 				const cookieStore = new BiliCookieStore();
@@ -54,7 +55,7 @@ export default function BiliDownloadCommand({bvid, flags}: Props) {
 		};
 
 		void run();
-	}, []);
+	});
 
 	if (error) {
 		return <ErrorDisplay message={error} suggestion="请检查视频链接是否正确" />;

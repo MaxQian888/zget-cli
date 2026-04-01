@@ -12,45 +12,50 @@ This process defines how to cut stable versions of zget.
 
 - [ ] `CHANGELOG.md` updated under `Unreleased`
 - [ ] `package.json` version updated
-- [ ] `pnpm test` passed
-- [ ] `pnpm test:docs` passed
-- [ ] `pnpm docs:check` passed
-- [ ] `pnpm build` passed
-- [ ] Smoke run verified (`node dist/cli.js --help`)
+- [ ] `pnpm verify:ci` passed
+- [ ] Release tag will exactly match `package.json` version (`vX.Y.Z`)
+- [ ] `NPM_TOKEN` secret is configured in GitHub Actions
 - [ ] README examples remain accurate
 
 ## Step-by-Step Release
 
 1. Update changelog and version.
-2. Run validation:
+2. Run full verification:
 
 ```bash
-pnpm test
-pnpm test:docs
-pnpm docs:check
-pnpm build
-node dist/cli.js --help
+pnpm verify:ci
 ```
 
-3. Commit release prep:
-
-```bash
-git add .
-git commit -m "chore: release vX.Y.Z"
-```
-
-4. Create tag:
+3. Commit and merge release prep to `main` / `master`.
+4. Create and push the release tag:
 
 ```bash
 git tag vX.Y.Z
 git push origin vX.Y.Z
 ```
 
-5. (Optional) Publish package:
+5. GitHub Actions `Release` workflow will automatically:
 
-```bash
-pnpm publish --access public
-```
+- validate the tag against `package.json`
+- re-run `pnpm release:verify`
+- create `zget-cli-X.Y.Z.tgz`
+- create `zget-cli-vX.Y.Z-dist.tar.gz`
+- publish the npm package
+- create or update the GitHub Release and upload both assets
+
+6. Verify the published package and GitHub Release page.
+
+## Release Assets
+
+The automated workflow uploads:
+
+- npm tarball: `zget-cli-X.Y.Z.tgz`
+- build archive: `zget-cli-vX.Y.Z-dist.tar.gz`
+
+## Retry Behavior
+
+- If the npm version is already published, the workflow skips `pnpm publish`.
+- If the GitHub Release already exists, the workflow updates assets with `--clobber`.
 
 ## Post-Release Tasks
 
