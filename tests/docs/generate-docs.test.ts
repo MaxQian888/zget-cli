@@ -2,19 +2,24 @@ import path from 'node:path';
 import process from 'node:process';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 
-const execFileMock = vi.fn();
+const convertMock = vi.fn();
+const validateMock = vi.fn();
+const generateOutputsMock = vi.fn();
+const bootstrapWithPluginsMock = vi.fn();
 const writeCliReferenceFileMock = vi.fn();
 const writeToolingBaselineFileMock = vi.fn();
 
-vi.mock('node:child_process', () => ({
-	execFile: execFileMock,
+vi.mock('typedoc', () => ({
+	Application: {
+		bootstrapWithPlugins: bootstrapWithPluginsMock,
+	},
 }));
 
-vi.mock('../../tools/docs/cli-reference', () => ({
+vi.mock('../../tools/docs/cli-reference.ts', () => ({
 	writeCliReferenceFile: writeCliReferenceFileMock,
 }));
 
-vi.mock('../../tools/docs/tooling-baseline', () => ({
+vi.mock('../../tools/docs/tooling-baseline.ts', () => ({
 	writeToolingBaselineFile: writeToolingBaselineFileMock,
 }));
 
@@ -23,16 +28,14 @@ describe('generate docs', () => {
 
 	beforeEach(() => {
 		process.argv = [...originalArgv];
-		execFileMock.mockImplementation(
-			(
-				_command: string,
-				_args: readonly string[],
-				_options: object,
-				callback: (error: Error | null) => void,
-			) => {
-				callback(null);
-			},
-		);
+		bootstrapWithPluginsMock.mockResolvedValue({
+			convert: convertMock,
+			validate: validateMock,
+			generateOutputs: generateOutputsMock,
+		});
+		convertMock.mockResolvedValue({name: 'project'});
+		validateMock.mockReturnValue(undefined);
+		generateOutputsMock.mockResolvedValue(undefined);
 		writeCliReferenceFileMock.mockResolvedValue(undefined);
 		writeToolingBaselineFileMock.mockResolvedValue(undefined);
 	});
@@ -41,7 +44,10 @@ describe('generate docs', () => {
 		process.argv = [...originalArgv];
 		vi.restoreAllMocks();
 		vi.resetModules();
-		execFileMock.mockReset();
+		convertMock.mockReset();
+		validateMock.mockReset();
+		generateOutputsMock.mockReset();
+		bootstrapWithPluginsMock.mockReset();
 		writeCliReferenceFileMock.mockReset();
 		writeToolingBaselineFileMock.mockReset();
 	});
@@ -62,18 +68,25 @@ describe('generate docs', () => {
 		});
 	});
 
-	it('uses cmd.exe for typedoc execution on Windows', async () => {
-		vi.spyOn(process, 'platform', 'get').mockReturnValue('win32');
+	it('boots TypeDoc with typedoc.json options and overridden output path', async () => {
 		const {generateDocs} = await import('../../tools/docs/generate-docs');
 
 		await generateDocs('D:/temp/docs');
 
-		expect(execFileMock).toHaveBeenCalledWith(
-			'cmd.exe',
-			expect.arrayContaining(['/d', '/s', '/c']),
-			expect.any(Object),
-			expect.any(Function),
+		expect(bootstrapWithPluginsMock).toHaveBeenCalledWith(
+			expect.objectContaining({
+				entryPoints: ['./source/index.ts'],
+				entryPointStrategy: 'resolve',
+				tsconfig: './tsconfig.json',
+				plugin: ['typedoc-plugin-markdown'],
+				readme: 'none',
+				cleanOutputDir: true,
+				hideGenerator: true,
+				out: 'D:/temp/docs/reference/api',
+			}),
 		);
+		expect(validateMock).toHaveBeenCalledWith({name: 'project'});
+		expect(generateOutputsMock).toHaveBeenCalledWith({name: 'project'});
 		expect(writeCliReferenceFileMock).toHaveBeenCalledWith(
 			path.join('D:/temp/docs', 'reference', 'cli.md'),
 		);
@@ -82,53 +95,21 @@ describe('generate docs', () => {
 		);
 	});
 
-	it('uses pnpm directly for typedoc execution on non-Windows platforms', async () => {
-		vi.spyOn(process, 'platform', 'get').mockReturnValue('linux');
-		const {generateDocs} = await import('../../tools/docs/generate-docs');
-
-		await generateDocs('D:/temp/docs');
-
-		expect(execFileMock).toHaveBeenCalledWith(
-			'pnpm',
-			[
-				'exec',
-				'typedoc',
-				'--options',
-				'typedoc.json',
-				'--out',
-				path.join('D:/temp/docs', 'reference', 'api'),
-			],
-			expect.any(Object),
-			expect.any(Function),
-		);
-	});
-
-	it('rejects when the typedoc process fails', async () => {
-		execFileMock.mockImplementationOnce(
-			(
-				_command: string,
-				_args: readonly string[],
-				_options: Record<string, unknown>,
-				callback: (error: Error | null) => void,
-			) => {
-				callback(new Error('typedoc failed'));
-			},
-		);
-		vi.spyOn(process, 'platform', 'get').mockReturnValue('linux');
+	it('rejects when TypeDoc cannot convert the project', async () => {
+		convertMock.mockResolvedValueOnce(undefined);
 		const {generateDocs} = await import('../../tools/docs/generate-docs');
 
 		await expect(generateDocs('D:/temp/docs')).rejects.toThrow(
-			'typedoc failed',
+			'typedoc failed to convert the project.',
 		);
 	});
 
 	it('runs generation on direct script execution', async () => {
 		process.argv[1] = path.resolve('tools/docs/generate-docs.ts');
-		vi.spyOn(process, 'platform', 'get').mockReturnValue('linux');
 
 		await import('../../tools/docs/generate-docs');
 
-		expect(execFileMock).toHaveBeenCalled();
+		expect(bootstrapWithPluginsMock).toHaveBeenCalled();
 		expect(writeCliReferenceFileMock).toHaveBeenCalled();
 		expect(writeToolingBaselineFileMock).toHaveBeenCalled();
 	});

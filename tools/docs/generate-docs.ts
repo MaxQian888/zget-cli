@@ -1,9 +1,10 @@
-import {execFile} from 'node:child_process';
+import {readFile} from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 import {pathToFileURL} from 'node:url';
-import {writeCliReferenceFile} from './cli-reference';
-import {writeToolingBaselineFile} from './tooling-baseline';
+import {Application, type TypeDocOptions} from 'typedoc';
+import {writeCliReferenceFile} from './cli-reference.ts';
+import {writeToolingBaselineFile} from './tooling-baseline.ts';
 
 export type GeneratedDocPaths = {
 	readonly apiOutDir: string;
@@ -11,29 +12,10 @@ export type GeneratedDocPaths = {
 	readonly toolingBaselineFile: string;
 };
 
-async function runCommand(
-	command: string,
-	args: readonly string[],
-): Promise<void> {
-	return new Promise((resolve, reject) => {
-		execFile(
-			command,
-			[...args],
-			{
-				cwd: process.cwd(),
-				env: process.env,
-			},
-			error => {
-				if (error) {
-					reject(error);
-					return;
-				}
-
-				resolve();
-			},
-		);
-	});
-}
+type TypeDocConfigFile = TypeDocOptions & {
+	readonly $schema?: string;
+	readonly out?: string;
+};
 
 export function resolveGeneratedDocPaths(
 	outputRoot = path.join(process.cwd(), 'docs'),
@@ -47,29 +29,33 @@ export function resolveGeneratedDocPaths(
 	};
 }
 
-async function runTypeDoc(apiOutDir: string): Promise<void> {
-	if (process.platform === 'win32') {
-		const relativeOutDir = path
-			.relative(process.cwd(), apiOutDir)
-			.replaceAll('\\', '/');
+async function loadTypeDocOptions(apiOutDir: string): Promise<TypeDocOptions> {
+	const configUrl = new URL('../../typedoc.json', import.meta.url);
+	const configContent = await readFile(configUrl, 'utf8');
+	const {
+		$schema: _schema,
+		out: _ignoredOut,
+		...options
+	} = JSON.parse(configContent) as TypeDocConfigFile;
 
-		await runCommand('cmd.exe', [
-			'/d',
-			'/s',
-			'/c',
-			`pnpm exec typedoc --options typedoc.json --out ${relativeOutDir}`,
-		]);
-		return;
+	return {
+		...options,
+		out: apiOutDir.replaceAll('\\', '/'),
+	};
+}
+
+async function runTypeDoc(apiOutDir: string): Promise<void> {
+	const app = await Application.bootstrapWithPlugins(
+		await loadTypeDocOptions(apiOutDir),
+	);
+	const project = await app.convert();
+
+	if (!project) {
+		throw new Error('typedoc failed to convert the project.');
 	}
 
-	await runCommand('pnpm', [
-		'exec',
-		'typedoc',
-		'--options',
-		'typedoc.json',
-		'--out',
-		apiOutDir,
-	]);
+	app.validate(project);
+	await app.generateOutputs(project);
 }
 
 export async function generateDocs(

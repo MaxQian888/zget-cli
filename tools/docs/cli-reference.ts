@@ -4,7 +4,7 @@ import {
 	buildCliHelpText,
 	cliFlags,
 	cliName,
-} from '../../source/cli-metadata.js';
+} from '../../source/cli-metadata.ts';
 
 type OptionRow = {
 	readonly option: string;
