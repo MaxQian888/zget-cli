@@ -30,9 +30,9 @@
 
 ## `pnpm build` fails
 
-- Check TypeScript output first.
+- Check the esbuild output first.
 - For CLI contract issues, inspect `source/cli.tsx`, `source/cli-metadata.ts`, and `source/index.ts`.
-- For docs tooling import issues, inspect `tools/docs/` and `tsconfig.tools.json`.
+- For docs tooling import issues, inspect `tools/docs/`, `typedoc.json`, and `tsconfig.tools.json`.
 
 ## Smoke output is wrong
 

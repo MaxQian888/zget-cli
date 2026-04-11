@@ -10,5 +10,5 @@
 		"verbatimModuleSyntax": false,
 		"noPropertyAccessFromIndexSignature": false
 	},
-	"include": ["source", "tsup.config.ts"]
+	"include": ["source"]
 }

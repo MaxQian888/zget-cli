@@ -20,7 +20,7 @@ This template uses a lightweight but strict validation model suitable for CLI st
 | Docs freshness     | `pnpm docs:check`               | Ensure committed generated docs match current source                           |
 | Docs generation    | `pnpm docs:generate`            | Refresh generated docs under `docs/reference/`                                 |
 | Type check         | `pnpm build:check`              | Verify TypeScript type safety before bundling                                  |
-| Compile            | `pnpm build`                    | Verify TypeScript compiles to `dist/`                                          |
+| Build              | `pnpm build`                    | Verify the CLI bundles to `dist/`                                              |
 | Smoke              | `pnpm smoke`                    | Validate built CLI behavior                                                    |
 | Package            | `pnpm pack:check`               | Verify npm tarball generation succeeds                                         |
 
@@ -68,9 +68,9 @@ pnpm test
 
 ### `pnpm build` fails
 
-- Review TypeScript error output.
-- Ensure ESM import paths are correct (for example `./app.js` from TypeScript sources when using `nodenext`).
-- Re-run build after fixing type/import issues.
+- Review the esbuild error output first.
+- Ensure the CLI entry and external dependency list in `package.json` still match runtime usage.
+- Re-run build after fixing the reported bundle issue.
 
 ### `pnpm test:docs` or `pnpm docs:check` fails
 

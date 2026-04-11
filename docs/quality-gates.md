@@ -21,7 +21,7 @@ pnpm ci:local
 | Docs coverage      | `pnpm test:docs:coverage`       | Enforce coverage thresholds for docs pipeline code                        |
 | Docs freshness     | `pnpm docs:check`               | Fail if committed generated docs drift from current source                |
 | Type check         | `pnpm build:check`              | Validate TypeScript types before bundling                                 |
-| Build              | `pnpm build`                    | Ensure TypeScript compiles to `dist/`                                     |
+| Build              | `pnpm build`                    | Ensure the CLI bundle is emitted to `dist/`                               |
 | Smoke              | `pnpm smoke`                    | Validate built CLI behavior                                               |
 | Package            | `pnpm pack:check`               | Verify npm tarball creation works before release                          |
 

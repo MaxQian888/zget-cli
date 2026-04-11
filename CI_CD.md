@@ -65,6 +65,8 @@ Configure repository rules for default branch:
 - Full CI parity gate: `pnpm verify:ci`
 - Release-only version check: `pnpm release:assert-version vX.Y.Z`
 - Release parity gate: `pnpm release:verify`
+- Release dry-run publish gate: `pnpm release:npm:dry-run`
+- Manual npm publish: `pnpm release:npm`
 
 ## Release Strategy
 

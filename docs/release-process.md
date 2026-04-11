@@ -57,6 +57,33 @@ The automated workflow uploads:
 - If the npm version is already published, the workflow skips `pnpm publish`.
 - If the GitHub Release already exists, the workflow updates assets with `--clobber`.
 
+## Manual npm Publish (Fallback)
+
+If GitHub Actions is temporarily unavailable, you can publish manually:
+
+1. Authenticate to npm on your machine:
+
+```bash
+npm login
+```
+
+2. Run a full dry-run verification before publishing:
+
+```bash
+pnpm release:npm:dry-run
+```
+
+3. Publish to npm:
+
+```bash
+pnpm release:npm
+```
+
+Notes:
+
+- `prepublishOnly` automatically runs `pnpm release:verify` before publishing.
+- Publishing the same version twice will be rejected by npm; bump `package.json` version first.
+
 ## Post-Release Tasks
 
 - Move released entries from `Unreleased` to versioned section (if not already done).
