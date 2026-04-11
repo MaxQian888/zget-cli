@@ -62,6 +62,7 @@ export const cliFlags = {
 export function buildCliHelpText(): string {
 	return `
   Usage
+    $ ${cliName}                             Open the interactive home screen
     $ ${cliName} <url>                       Auto-detect platform and download
 
   Download Commands

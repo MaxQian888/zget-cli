@@ -26,6 +26,23 @@ npm install -g zget-cli
 
 ## Usage
 
+### Interactive home
+
+Run `zget` with no positional arguments to open the interactive Ink home screen:
+
+```sh
+zget
+```
+
+The first release focuses on the account-center flow:
+
+- open the mixed navigation home
+- enter the account center
+- inspect Zhihu / X / XHS / Bilibili / AI status
+- re-check account state, clear saved credentials, or jump to the login/setup command
+
+### Command mode
+
 ### Auto-detect from URL
 
 Paste any supported URL and zget detects the platform automatically:
@@ -282,7 +299,7 @@ All persistent data lives under `~/.zget-cli/`:
 ```sh
 pnpm install
 pnpm dev              # Run from source with tsx
-pnpm build            # Compile to dist/
+pnpm build            # Bundle the CLI to dist/
 pnpm build:check      # TypeScript type check only
 pnpm lint             # XO linter
 pnpm format           # Prettier

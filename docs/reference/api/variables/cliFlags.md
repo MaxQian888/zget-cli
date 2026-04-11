@@ -8,7 +8,7 @@
 
 > `const` **cliFlags**: `object`
 
-Defined in: [cli-metadata.ts:3](https://github.com/AstroAir/react-cli-quick-starter/blob/main/source/cli-metadata.ts#L3)
+Defined in: cli-metadata.ts:3
 
 ## Type Declaration
 

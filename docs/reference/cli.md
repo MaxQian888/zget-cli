@@ -10,6 +10,7 @@ $ zget <url>
 
 ```text
 Usage
+    $ zget                             Open the interactive home screen
     $ zget <url>                       Auto-detect platform and download
 
   Download Commands

@@ -41,6 +41,49 @@ describe('generated docs check', () => {
 		]);
 	});
 
+	it('ignores unstable Typedoc source-link formatting in "Defined in" lines', async () => {
+		const temporaryRoot = await mkdtemp(path.join(os.tmpdir(), 'docs-check-'));
+		temporaryDirectories.push(temporaryRoot);
+
+		const expectedFile = path.join(temporaryRoot, 'expected.md');
+		const actualFile = path.join(temporaryRoot, 'actual.md');
+
+		await writeFile(
+			expectedFile,
+			[
+				'# Function',
+				'',
+				'Defined in: app.tsx:33',
+				'',
+				'## Returns',
+				'',
+				'`Element`',
+			].join('\n'),
+		);
+		await writeFile(
+			actualFile,
+			[
+				'# Function',
+				'',
+				'Defined in: [app.tsx:33](https://example.com/source/app.tsx#L33)',
+				'',
+				'## Returns',
+				'',
+				'`Element`',
+			].join('\n'),
+		);
+
+		const mismatches = await findGeneratedDocMismatches([
+			{
+				expectedPath: expectedFile,
+				actualPath: actualFile,
+				label: 'typedoc-source-link',
+			},
+		]);
+
+		expect(mismatches).toEqual([]);
+	});
+
 	it('reports missing generated docs when the expected output file is absent', async () => {
 		const temporaryRoot = await mkdtemp(path.join(os.tmpdir(), 'docs-check-'));
 		temporaryDirectories.push(temporaryRoot);

@@ -20,6 +20,9 @@ import BiliInteractCommand from './commands/bili-interact';
 import BiliDownloadCommand from './commands/bili-download';
 import BiliLoginCommand from './commands/bili-login';
 import SummaryCommand from './commands/summary';
+import UiHomeCommand from './commands/ui-home';
+import UiAccountCenterCommand from './commands/ui-account-center';
+import UiAccountPlatformCommand from './commands/ui-account-platform';
 
 type Props = {
 	readonly resolved: ResolvedCommand;
@@ -31,6 +34,19 @@ export default function App({resolved}: Props) {
 	const {command, url, flags, limit, text, format} = resolved;
 
 	switch (command) {
+		// --- Interactive UI ---
+		case 'ui-home': {
+			return <UiHomeCommand flags={flags} />;
+		}
+
+		case 'ui-account-center': {
+			return <UiAccountCenterCommand flags={flags} />;
+		}
+
+		case 'ui-account-platform': {
+			return <UiAccountPlatformCommand url={url ?? ''} flags={flags} />;
+		}
+
 		// --- Zhihu download ---
 		case 'article':
 		case 'answer':

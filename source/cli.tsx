@@ -69,6 +69,7 @@ type RunCliOptions = {
 	readonly cli?: CliInstance;
 	readonly renderApp?: (tree: Parameters<typeof render>[0]) => unknown;
 	readonly dependencies?: Partial<ResolveCommandDependencies>;
+	readonly isInteractiveTerminal?: () => boolean;
 };
 
 const cliFlagEntries: Array<
@@ -188,8 +189,7 @@ export function resolveCommand(
 	const [first, second, third] = input;
 
 	if (!first) {
-		cli.showHelp(0);
-		return {command: 'help', flags};
+		return {command: 'ui-home', flags};
 	}
 
 	// Login
@@ -515,8 +515,14 @@ export function runCli({
 	cli = createCli(),
 	renderApp,
 	dependencies,
+	isInteractiveTerminal = () => Boolean(process.stdout.isTTY),
 }: RunCliOptions = {}) {
 	const resolved = resolveCommand(cli, dependencies);
+	if (resolved.command === 'ui-home' && !isInteractiveTerminal()) {
+		cli.showHelp(0);
+		return undefined;
+	}
+
 	return (renderApp ?? render)(<App resolved={resolved} />) as unknown;
 }
 

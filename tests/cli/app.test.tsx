@@ -41,6 +41,13 @@ vi.mock('../../source/commands/bili-download', () =>
 );
 vi.mock('../../source/commands/bili-login', () => mockCommand('bili-login'));
 vi.mock('../../source/commands/summary', () => mockCommand('summary'));
+vi.mock('../../source/commands/ui-home', () => mockCommand('ui-home'));
+vi.mock('../../source/commands/ui-account-center', () =>
+	mockCommand('ui-account-center'),
+);
+vi.mock('../../source/commands/ui-account-platform', () =>
+	mockCommand('ui-account-platform'),
+);
 
 type ResolvedCommand = Parameters<typeof App>[0]['resolved'];
 
@@ -63,6 +70,31 @@ function createResolved(
 }
 
 const routeCases = [
+	{
+		name: 'interactive home routes through UiHomeCommand',
+		resolved: createResolved({
+			command: 'ui-home',
+		}),
+		label: 'ui-home',
+		fragments: ['"output":"./downloads"', '"resume":true'],
+	},
+	{
+		name: 'interactive account center routes through UiAccountCenterCommand',
+		resolved: createResolved({
+			command: 'ui-account-center',
+		}),
+		label: 'ui-account-center',
+		fragments: ['"output":"./downloads"', '"resume":true'],
+	},
+	{
+		name: 'interactive account platform routes through UiAccountPlatformCommand',
+		resolved: createResolved({
+			command: 'ui-account-platform',
+			url: 'xhs',
+		}),
+		label: 'ui-account-platform',
+		fragments: ['"url":"xhs"', '"output":"./downloads"'],
+	},
 	{
 		name: 'Zhihu downloads through DownloadCommand',
 		resolved: createResolved({

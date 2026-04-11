@@ -1,10 +1,12 @@
-import os from 'node:os';
 import path from 'node:path';
 import {mkdtemp, readdir, rm} from 'node:fs/promises';
 import process from 'node:process';
 import {pathToFileURL} from 'node:url';
-import {findGeneratedDocMismatches, type GeneratedDocPair} from './doc-check';
-import {generateDocs, resolveGeneratedDocPaths} from './generate-docs';
+import {
+	findGeneratedDocMismatches,
+	type GeneratedDocPair,
+} from './doc-check.ts';
+import {generateDocs, resolveGeneratedDocPaths} from './generate-docs.ts';
 
 async function listMarkdownFiles(rootPath: string): Promise<string[]> {
 	let entries: Awaited<ReturnType<typeof readdir>>;
@@ -69,7 +71,7 @@ async function buildApiDocPairs(
 
 export async function checkGeneratedDocs(): Promise<GeneratedDocPair[]> {
 	const temporaryRoot = await mkdtemp(
-		path.join(os.tmpdir(), 'generated-docs-'),
+		path.join(process.cwd(), '.generated-docs-check-'),
 	);
 
 	try {

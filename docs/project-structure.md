@@ -22,7 +22,7 @@ zget-cli/
 ├── package.json
 ├── tsconfig.json
 ├── tsconfig.tools.json
-└── tsup.config.ts
+└── typedoc.json
 ```
 
 ### `source/`
@@ -56,6 +56,9 @@ Implementation layer for all runtime behavior.
   - `browse.tsx` — Zhihu browse commands
   - `platform-download.tsx` — CSDN / WeChat / Juejin download
   - `login.tsx` — Zhihu QR code login
+  - `ui-home.tsx` — no-argument interactive home shell
+  - `ui-account-center.tsx` — unified account overview
+  - `ui-account-platform.tsx` — platform detail view for account actions
   - `x-browse.tsx`, `x-interact.tsx`, `x-download.tsx`, `x-login.tsx` — X (Twitter)
   - `xhs-browse.tsx`, `xhs-interact.tsx`, `xhs-download.tsx`, `xhs-login.tsx`, `xhs-publish.tsx` — XHS
   - `bili-browse.tsx`, `bili-interact.tsx`, `bili-download.tsx`, `bili-login.tsx` — Bilibili
@@ -71,6 +74,7 @@ Implementation layer for all runtime behavior.
 
   - Platform-agnostic business logic, organized by domain:
   - `core/api/` — HTTP clients for each platform (Zhihu, X, XHS, Bilibili)
+  - `core/account/` — normalized account probes, snapshots, and actions for the interactive account center
   - `core/auth/` — Cookie stores and auth flows per platform
   - `core/downloader/` — Download orchestration and per-platform downloader implementations
   - `core/parser/` — HTML-to-Markdown conversion and per-platform parse rules
@@ -118,7 +122,7 @@ Agent skills for operating this repository.
 - `package.json` — Scripts, dependencies, lint/format config
 - `tsconfig.json` — Compile target and module strategy
 - `tsconfig.tools.json` — Type-aware config for docs tooling and tests
-- `tsup.config.ts` — Build bundler configuration
+- `typedoc.json` — TypeDoc reference output configuration
 - `README.md` / `README_zh.md` — Entry documentation for users and maintainers
 - `CONTRIBUTING.md` — Collaboration contract
 - `TESTING.md` — Validation contract

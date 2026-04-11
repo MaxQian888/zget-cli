@@ -88,15 +88,15 @@ function createDependencies(parseResult = unknownParsedUrl) {
 }
 
 describe('resolveCommand', () => {
-	it('shows help and resolves help when no input is provided', () => {
+	it('resolves the interactive home when no input is provided', () => {
 		const showHelp = vi.fn();
 		const cli = createCliStub({input: [], showHelp});
 
 		expect(resolveCommand(cli)).toEqual({
-			command: 'help',
+			command: 'ui-home',
 			flags: createExpectedFlags(),
 		});
-		expect(showHelp).toHaveBeenCalledWith(0);
+		expect(showHelp).not.toHaveBeenCalled();
 	});
 
 	it('resolves login without requiring a URL', () => {
@@ -544,6 +544,24 @@ describe('runCli', () => {
 			flags: createExpectedFlags(),
 			format: 'json',
 		});
+	});
+
+	it('falls back to help instead of rendering the interactive home in non-interactive mode', () => {
+		const renderApp = vi.fn();
+		const showHelp = vi.fn();
+		const cli = createCliStub({
+			input: [],
+			showHelp,
+		});
+
+		runCli({
+			cli,
+			renderApp,
+			isInteractiveTerminal: () => false,
+		});
+
+		expect(showHelp).toHaveBeenCalledWith(0);
+		expect(renderApp).not.toHaveBeenCalled();
 	});
 });
 

@@ -5,6 +5,9 @@ describe('cli metadata', () => {
 	it('builds help text from the shared CLI contract', () => {
 		const helpText = buildCliHelpText();
 
+		expect(helpText).toContain(
+			`$ ${cliName}                             Open the interactive home screen`,
+		);
 		expect(helpText).toContain(`$ ${cliName} <url>`);
 		expect(helpText).toContain(
 			`$ ${cliName} xhs post "<title>" --image photo.jpg`,

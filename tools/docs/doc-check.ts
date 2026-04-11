@@ -14,7 +14,10 @@ export type GeneratedDocMismatch = {
 };
 
 function normalizeGeneratedContent(content: string): string {
-	return content.replace(/\r\n/g, '\n').trimEnd();
+	return content
+		.replace(/\r\n/g, '\n')
+		.replace(/^Defined in:\s+\[(.+?)]\([^)]+\)$/gm, 'Defined in: $1')
+		.trimEnd();
 }
 
 async function pathExists(path: string): Promise<boolean> {

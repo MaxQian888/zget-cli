@@ -7,9 +7,10 @@ This document explains the current CLI architecture and extension strategy.
 1. User executes `dist/cli.js`
 2. `source/cli.tsx` reads shared CLI metadata from `source/cli-metadata.ts`
 3. `meow` parses arguments using the shared contract
-4. Parsed flags are transformed into app props
-5. `render(<App ... />)` mounts Ink UI
-6. `source/app.tsx` returns terminal output
+4. Empty positional input resolves to the interactive home; explicit commands keep their existing routing behavior
+5. Parsed flags are transformed into app props
+6. `render(<App ... />)` mounts Ink UI
+7. `source/app.tsx` returns terminal output
 
 ## Separation of Concerns
 
@@ -21,6 +22,7 @@ Responsibilities:
 - Shared usage/help text wiring
 - Input normalization
 - App bootstrapping
+- No-argument interactive-home routing
 
 Should avoid:
 
@@ -34,6 +36,7 @@ Responsibilities:
 - Rendering output components
 - Handling presentation state
 - Defining user-facing text structure
+- Switching between command mode and interactive Ink workspaces
 
 Should avoid:
 

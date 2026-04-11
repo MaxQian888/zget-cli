@@ -15,21 +15,23 @@ vi.mock('node:fs/promises', () => ({
 	rm: rmMock,
 }));
 
-vi.mock('../../tools/docs/generate-docs', () => ({
+vi.mock('../../tools/docs/generate-docs.ts', () => ({
 	generateDocs: generateDocsMock,
 	resolveGeneratedDocPaths: resolveGeneratedDocPathsMock,
 }));
 
-vi.mock('../../tools/docs/doc-check', () => ({
+vi.mock('../../tools/docs/doc-check.ts', () => ({
 	findGeneratedDocMismatches: findGeneratedDocMismatchesMock,
 }));
 
 describe('check generated docs', () => {
 	const originalArgv = [...process.argv];
+	const cwdSpy = vi.spyOn(process, 'cwd');
 
 	beforeEach(() => {
 		process.argv = [...originalArgv];
-		mkdtempMock.mockResolvedValue('D:/temp/generated-docs');
+		cwdSpy.mockReturnValue('D:/repo');
+		mkdtempMock.mockResolvedValue('D:/repo/.generated-docs-check-abc123');
 		rmMock.mockResolvedValue(undefined);
 		generateDocsMock.mockResolvedValue(undefined);
 		findGeneratedDocMismatchesMock.mockResolvedValue([]);
@@ -44,14 +46,18 @@ describe('check generated docs', () => {
 				),
 			})
 			.mockReturnValueOnce({
-				apiOutDir: path.join('D:/temp/generated-docs', 'reference', 'api'),
+				apiOutDir: path.join(
+					'D:/repo/.generated-docs-check-abc123',
+					'reference',
+					'api',
+				),
 				cliReferenceFile: path.join(
-					'D:/temp/generated-docs',
+					'D:/repo/.generated-docs-check-abc123',
 					'reference',
 					'cli.md',
 				),
 				toolingBaselineFile: path.join(
-					'D:/temp/generated-docs',
+					'D:/repo/.generated-docs-check-abc123',
 					'reference',
 					'tooling-baseline.md',
 				),
@@ -105,7 +111,12 @@ describe('check generated docs', () => {
 
 		const pairs = await checkGeneratedDocs();
 
-		expect(generateDocsMock).toHaveBeenCalledWith('D:/temp/generated-docs');
+		expect(mkdtempMock).toHaveBeenCalledWith(
+			path.join('D:/repo', '.generated-docs-check-'),
+		);
+		expect(generateDocsMock).toHaveBeenCalledWith(
+			'D:/repo/.generated-docs-check-abc123',
+		);
 		expect(findGeneratedDocMismatchesMock).toHaveBeenCalledWith(
 			expect.arrayContaining([
 				expect.objectContaining({label: 'cli.md'}),
@@ -117,10 +128,13 @@ describe('check generated docs', () => {
 			]),
 		);
 		expect(pairs).toHaveLength(4);
-		expect(rmMock).toHaveBeenCalledWith('D:/temp/generated-docs', {
-			recursive: true,
-			force: true,
-		});
+		expect(rmMock).toHaveBeenCalledWith(
+			'D:/repo/.generated-docs-check-abc123',
+			{
+				recursive: true,
+				force: true,
+			},
+		);
 	});
 
 	it('throws when generated docs are stale or missing', async () => {

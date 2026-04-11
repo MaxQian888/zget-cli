@@ -28,6 +28,23 @@ npm install -g zget-cli
 
 ## 使用方法
 
+### 交互首页
+
+直接运行 `zget`（不带位置参数）会进入交互式 Ink 首页：
+
+```bash
+zget
+```
+
+首版重点打通账号中心链路：
+
+- 进入混合导航首页
+- 打开账号中心
+- 查看 Zhihu / X / XHS / Bilibili / AI 的状态
+- 重新检查账号、清理本地凭据，或跳转到对应登录/配置命令
+
+### 命令模式
+
 ### URL 自动识别
 
 直接传入任意支持的 URL，zget 自动识别平台并执行对应操作：
@@ -284,7 +301,7 @@ AI 配置从 `~/.zget-cli/ai-config.json` 或环境变量读取：
 ```bash
 pnpm install
 pnpm dev              # 使用 tsx 从源码运行
-pnpm build            # 编译到 dist/
+pnpm build            # 打包 CLI 到 dist/
 pnpm build:check      # 仅做 TypeScript 类型检查
 pnpm lint             # XO lint
 pnpm format           # Prettier 格式化

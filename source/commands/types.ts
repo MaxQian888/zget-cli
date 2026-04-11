@@ -7,6 +7,10 @@ export type GlobalFlags = {
 };
 
 export type CommandName =
+	// Interactive UI
+	| 'ui-home'
+	| 'ui-account-center'
+	| 'ui-account-platform'
 	// Download
 	| 'login'
 	| 'article'
