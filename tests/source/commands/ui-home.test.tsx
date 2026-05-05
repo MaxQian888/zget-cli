@@ -1,3 +1,4 @@
+import {Text} from 'ink';
 import {render} from 'ink-testing-library';
 import {describe, expect, it, vi} from 'vitest';
 import UiHomeCommand from '../../../source/commands/ui-home';
@@ -5,7 +6,7 @@ import {baseFlags, flushAsync, setupCommandTestHarness} from './test-helpers';
 
 vi.mock('../../../source/commands/ui-account-center', () => ({
 	default() {
-		return 'ui-account-center';
+		return <Text>ui-account-center</Text>;
 	},
 }));
 
