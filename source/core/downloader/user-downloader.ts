@@ -1,6 +1,5 @@
 import {join} from 'node:path';
 import {mkdir} from 'node:fs/promises';
-import type {ApiClient} from '../api/client';
 import type {ZhihuApi} from '../api/zhihu-api';
 import {sanitizeFilename} from '../utils/file-naming';
 import {DownloadTracker} from '../state/download-tracker';
@@ -16,7 +15,6 @@ export type UserDownloadOptions = DownloadOptions & {
 export async function downloadUserContent(
 	userId: string,
 	api: ZhihuApi,
-	client: ApiClient,
 	options: UserDownloadOptions,
 ): Promise<{success: number; failed: number; userName: string}> {
 	const {outputDir, resume, onBatchProgress} = options;
@@ -55,7 +53,7 @@ export async function downloadUserContent(
 		}
 
 		try {
-			const result = await downloadArticle(String(article.id), api, client, {
+			const result = await downloadArticle(String(article.id), api, {
 				...options,
 				outputDir: userDir,
 			});

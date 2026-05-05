@@ -1,3 +1,4 @@
+import {access} from 'node:fs/promises';
 import {type XhsCookieStore, XsecTokenCache} from '../auth/xhs-auth';
 import type {
 	XhsNote,
@@ -186,47 +187,110 @@ export class XhsApi {
 	async publishImageNote(
 		title: string,
 		content: string,
-		_imagePaths: string[],
+		imagePaths: string[],
 	): Promise<{noteId: string}> {
+		if (imagePaths.length === 0) {
+			throw new Error('图文笔记至少需要 1 张图片');
+		}
+
+		// XHS publish page rejects more than 18 images at once.
+		if (imagePaths.length > 18) {
+			throw new Error('图文笔记最多支持 18 张图片');
+		}
+
+		await Promise.all(
+			imagePaths.map(async path => {
+				try {
+					await access(path);
+				} catch {
+					throw new Error(`图片文件不存在: ${path}`);
+				}
+			}),
+		);
+
 		const browser = await this.ensureBrowser();
-		// Navigate to creator publish page
 		await browser.navigateAndExtract(
 			'https://creator.xiaohongshu.com/publish/publish',
 		);
 
+		// Switch to the image-and-text tab; the page defaults to video upload.
 		try {
-			// Upload images - this requires file input interaction
-			// Note: actual image upload needs Playwright file chooser API
-			// This is a simplified flow
-
-			// Fill title
-			await browser.fillInput('[class*="title"] input, #title-input', title);
-
-			// Fill content
-			await browser.fillInput(
-				'[class*="content"] textarea, #content-input',
-				content,
-			);
-
-			// Submit
 			await browser.performClick(
-				'[class*="publish-btn"], .publish-btn, button[type="submit"]',
+				'div:has-text("上传图文"), span:has-text("上传图文"), [class*="image-tab"]',
 			);
+		} catch {
+			// Some page versions land on the image tab directly; ignore failure.
+		}
 
-			// Wait for redirect / confirmation
+		// Upload images. Prefer the hidden <input type=file> when present, fall
+		// back to the native file-chooser triggered by the upload button.
+		try {
+			await browser.setInputFiles('input[type="file"]', imagePaths);
+		} catch {
+			try {
+				await browser.uploadFile(
+					'.upload-button, [class*="upload"] button, [class*="upload-input"]',
+					imagePaths,
+				);
+			} catch {
+				throw new Error('上传图片失败，请确认创作者中心已加载并已登录');
+			}
+		}
+
+		// Wait for at least one thumbnail to render before filling metadata.
+		try {
 			await browser.waitForElement(
-				'[class*="success"], .publish-success',
+				'[class*="preview"] img, [class*="img-list"] img, [class*="upload-success"]',
 				30_000,
 			);
-
-			// Try to extract note ID from URL
-			const currentUrl = browser.getCurrentUrl();
-			const match = /explore\/([a-f\d]+)/i.exec(currentUrl);
-
-			return {noteId: match?.[1] ?? 'unknown'};
 		} catch {
-			throw new Error('发布失败，可能需要登录到创作者中心');
+			throw new Error('图片上传超时，可能因网络或风控导致');
 		}
+
+		try {
+			await browser.fillInput(
+				'[class*="title"] input, [class*="title-input"], #title-input',
+				title,
+			);
+
+			if (content) {
+				await browser.fillInput(
+					'[class*="content"] textarea, [class*="editor"] [contenteditable="true"], #content-input',
+					content,
+				);
+			}
+		} catch {
+			throw new Error('填写笔记内容失败，页面结构可能已变更');
+		}
+
+		try {
+			await browser.performClick(
+				'button:has-text("发布"), [class*="publish-btn"], .publish-btn, button[type="submit"]',
+			);
+		} catch {
+			throw new Error('点击发布按钮失败，可能因风控或额度限制');
+		}
+
+		// Wait for navigation to a success page or for the success toast.
+		try {
+			await browser.waitForUrlMatch(
+				/(publish\/success|explore\/[a-f\d]+)/i,
+				60_000,
+			);
+		} catch {
+			try {
+				await browser.waitForElement(
+					'[class*="publish-success"], [class*="success-tip"]',
+					15_000,
+				);
+			} catch {
+				throw new Error('发布超时，未确认笔记已成功发布');
+			}
+		}
+
+		const currentUrl = browser.getCurrentUrl();
+		const match = /explore\/([a-f\d]+)/i.exec(currentUrl);
+		return {noteId: match?.[1] ?? 'unknown'};
 	}
 
 	// --- Auth helpers ---

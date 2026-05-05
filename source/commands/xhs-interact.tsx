@@ -7,6 +7,12 @@ import {XhsApi} from '../core/api/xhs-api';
 import {useInkApp} from '../core/utils/ink-app';
 import ErrorDisplay from '../components/error-display';
 import InteractResult from '../components/interact-result';
+import {
+	ExitCode,
+	type ExitCodeValue,
+	getErrorHint,
+	getExitCode,
+} from '../core/utils/exit-codes';
 import type {GlobalFlags} from './types';
 
 type XhsInteractType =
@@ -42,6 +48,7 @@ export default function XhsInteractCommand({
 	useRunOnceEffect(() => {
 		const run = async () => {
 			let xhsApi: XhsApi | undefined;
+			let pendingExitCode: ExitCodeValue = ExitCode.OK;
 			try {
 				const cookieStore = new XhsCookieStore();
 				await cookieStore.load();
@@ -106,12 +113,26 @@ export default function XhsInteractCommand({
 				setSuccess(true);
 				setLoading(false);
 			} catch (error_: unknown) {
-				setError(error_ instanceof Error ? error_.message : String(error_));
+				const message =
+					error_ instanceof Error ? error_.message : String(error_);
+				pendingExitCode = getExitCode(error_);
+				const hint = getErrorHint(error_);
+				setError(message);
+				if (format === 'json') {
+					setJsonOutput(
+						JSON.stringify(
+							{ok: false, error: {code: pendingExitCode, message, hint}},
+							null,
+							2,
+						),
+					);
+				}
+
 				setLoading(false);
 			} finally {
 				if (xhsApi) await xhsApi.close();
 				setTimeout(() => {
-					exit();
+					exit(pendingExitCode);
 				}, 100);
 			}
 		};

@@ -59,7 +59,7 @@ export default function UserCommand({url, flags}: Props) {
 						? parsed.userId
 						: url;
 
-				const result = await downloadUserContent(userId, api, client, {
+				const result = await downloadUserContent(userId, api, {
 					outputDir: flags.output,
 					downloadImages: flags.images,
 					verbose: flags.verbose,

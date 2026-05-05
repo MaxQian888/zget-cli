@@ -93,10 +93,12 @@ describe('parseUrl', () => {
 			type: 'user',
 			userId: '64fa88aabbccdd0011223344',
 		});
+		// Short links return the original URL as noteId so downstream callers
+		// (xhs-download command) can detect them and resolve via 302.
 		expect(parseUrl('https://xhslink.com/abc123')).toEqual({
 			platform: 'xhs',
 			type: 'note',
-			noteId: 'abc123',
+			noteId: 'https://xhslink.com/abc123',
 		});
 		expect(parseUrl(' https://www.bilibili.com/video/BV1xx411c7mD ')).toEqual({
 			platform: 'bili',

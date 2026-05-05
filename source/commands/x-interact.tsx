@@ -7,6 +7,12 @@ import {XApi} from '../core/api/x-api';
 import {useInkApp} from '../core/utils/ink-app';
 import ErrorDisplay from '../components/error-display';
 import InteractResult from '../components/interact-result';
+import {
+	ExitCode,
+	type ExitCodeValue,
+	getErrorHint,
+	getExitCode,
+} from '../core/utils/exit-codes';
 import type {GlobalFlags} from './types';
 
 type TwitterInteractType =
@@ -41,6 +47,7 @@ export default function TwitterInteractCommand({
 
 	useRunOnceEffect(() => {
 		const run = async () => {
+			let pendingExitCode: ExitCodeValue = ExitCode.OK;
 			try {
 				const credStore = new XCredentialStore();
 				await credStore.load();
@@ -111,11 +118,25 @@ export default function TwitterInteractCommand({
 				setSuccess(true);
 				setLoading(false);
 			} catch (error_: unknown) {
-				setError(error_ instanceof Error ? error_.message : String(error_));
+				const message =
+					error_ instanceof Error ? error_.message : String(error_);
+				pendingExitCode = getExitCode(error_);
+				const hint = getErrorHint(error_);
+				setError(message);
+				if (format === 'json') {
+					setJsonOutput(
+						JSON.stringify(
+							{ok: false, error: {code: pendingExitCode, message, hint}},
+							null,
+							2,
+						),
+					);
+				}
+
 				setLoading(false);
 			} finally {
 				setTimeout(() => {
-					exit();
+					exit(pendingExitCode);
 				}, 100);
 			}
 		};

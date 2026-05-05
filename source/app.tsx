@@ -31,7 +31,7 @@ type Props = {
 // The CLI dispatcher keeps the command-to-component routing explicit in one place.
 // eslint-disable-next-line complexity
 export default function App({resolved}: Props) {
-	const {command, url, flags, limit, text, format} = resolved;
+	const {command, url, flags, limit, text, format, images, content} = resolved;
 
 	switch (command) {
 		// --- Interactive UI ---
@@ -210,7 +210,8 @@ export default function App({resolved}: Props) {
 			return (
 				<XhsPublishCommand
 					title={url ?? ''}
-					content={text}
+					content={content ?? text}
+					images={images}
 					flags={flags}
 					format={format}
 				/>

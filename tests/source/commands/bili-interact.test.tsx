@@ -90,6 +90,30 @@ describe('BiliInteractCommand', () => {
 		expect(frame).toContain('"target": "BV1json"');
 	});
 
+	it('emits a structured json failure when an action rejects', async () => {
+		mocks.api.likeVideo.mockRejectedValue(new Error('Permission denied'));
+
+		const view = render(
+			<BiliInteractCommand
+				interactType="bili-like"
+				target="BV1fail"
+				flags={baseFlags}
+				format="json"
+			/>,
+		);
+
+		await flushAsync();
+
+		const frame = view.lastFrame() ?? '';
+		const parsed = JSON.parse(frame) as {
+			ok: boolean;
+			error: {code: number; message: string};
+		};
+		expect(parsed.ok).toBe(false);
+		expect(parsed.error.code).toBe(77);
+		expect(parsed.error.message).toBe('Permission denied');
+	});
+
 	it('surfaces unsupported interact types as errors', async () => {
 		const view = render(
 			<BiliInteractCommand

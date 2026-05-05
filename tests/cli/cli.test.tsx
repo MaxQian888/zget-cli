@@ -16,6 +16,7 @@ const baseFlags: CliInstance['flags'] = {
 	verbose: false,
 	resume: true,
 	images: true,
+	image: [],
 	cookies: '',
 	limit: 10,
 	format: 'human',
@@ -209,6 +210,43 @@ describe('resolveCommand', () => {
 			flags: createExpectedFlags(),
 			format: 'json',
 		});
+	});
+
+	it('routes xhs post with multiple --image and --content flags', () => {
+		const cli = createCliStub({
+			input: ['xhs', 'post', '我的标题'],
+			flags: {
+				...baseFlags,
+				image: ['a.jpg', 'b.jpg'],
+				content: '正文段落',
+				format: 'json',
+			},
+		});
+
+		expect(resolveCommand(cli)).toEqual({
+			command: 'xhs-post',
+			url: '我的标题',
+			flags: createExpectedFlags(),
+			limit: 10,
+			format: 'json',
+			text: undefined,
+			images: ['a.jpg', 'b.jpg'],
+			content: '正文段落',
+			extraArgs: [],
+		});
+	});
+
+	it('rejects xhs post without --image', () => {
+		const cli = createCliStub({
+			input: ['xhs', 'post', '没图笔记'],
+		});
+		const {dependencies, exitMock, stderrWrites} = createDependencies();
+
+		expect(() => resolveCommand(cli, dependencies)).toThrow('exit:1');
+		expect(stderrWrites.join('')).toContain(
+			'xhs post requires at least one --image',
+		);
+		expect(exitMock).toHaveBeenCalledWith(1);
 	});
 
 	it('accepts xhs URLs in place of explicit subcommands', () => {

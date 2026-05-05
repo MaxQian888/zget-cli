@@ -106,7 +106,6 @@ describe('DownloadCommand', () => {
 		expect(mocks.downloadArticle).toHaveBeenCalledWith(
 			'12345',
 			expect.anything(),
-			expect.anything(),
 			expect.objectContaining({
 				outputDir: './downloads',
 				downloadImages: true,

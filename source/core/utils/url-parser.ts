@@ -128,12 +128,10 @@ export function parseUrl(input: string): ParsedUrl {
 	}
 
 	// Short link: xhslink.com/<code>
+	// Pass the full URL through as the noteId so downstream callers can detect
+	// it (starts with http/https) and resolve via the 302 redirect.
 	if (/xhslink\.com\//i.test(url)) {
-		// Extract the path as noteId placeholder; will need to resolve via redirect
-		const shortMatch = /xhslink\.com\/([a-z\d]+)/i.exec(url);
-		if (shortMatch) {
-			return {platform: 'xhs', type: 'note', noteId: shortMatch[1]!};
-		}
+		return {platform: 'xhs', type: 'note', noteId: url};
 	}
 
 	// User: xiaohongshu.com/user/profile/<id>

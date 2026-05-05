@@ -12,6 +12,8 @@ import type {
 import DownloadProgress from '../components/download-progress';
 import ContentPreview from '../components/content-preview';
 import ErrorDisplay from '../components/error-display';
+import {parseUrl} from '../core/utils/url-parser';
+import {isXhsShortLink, resolveXhsShortLink} from '../core/utils/url-resolver';
 import type {GlobalFlags} from './types';
 
 type Props = {
@@ -32,6 +34,18 @@ export default function XhsDownloadCommand({noteId, flags}: Props) {
 		const run = async () => {
 			let xhsApi: XhsApi | undefined;
 			try {
+				let resolvedNoteId = noteId;
+				if (isXhsShortLink(noteId)) {
+					setProgress({phase: 'fetching', message: '解析短链接...'});
+					const finalUrl = await resolveXhsShortLink(noteId);
+					const parsed = parseUrl(finalUrl);
+					if (parsed.platform !== 'xhs' || parsed.type !== 'note') {
+						throw new Error(`短链接解析失败，未指向小红书笔记: ${finalUrl}`);
+					}
+
+					resolvedNoteId = parsed.noteId;
+				}
+
 				const cookieStore = new XhsCookieStore();
 				await cookieStore.load();
 				if (flags.cookies) cookieStore.parseCookieString(flags.cookies);
@@ -39,7 +53,7 @@ export default function XhsDownloadCommand({noteId, flags}: Props) {
 				xhsApi = new XhsApi(cookieStore);
 				await xhsApi.init();
 
-				const downloadResult = await downloadXhsNote(noteId, xhsApi, {
+				const downloadResult = await downloadXhsNote(resolvedNoteId, xhsApi, {
 					outputDir: flags.output,
 					downloadImages: flags.images,
 					verbose: flags.verbose,

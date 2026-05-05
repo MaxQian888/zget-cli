@@ -99,4 +99,6 @@ export type ResolvedCommand = {
 	text?: string;
 	extraArgs?: string[];
 	format?: 'human' | 'json';
+	images?: string[];
+	content?: string;
 };

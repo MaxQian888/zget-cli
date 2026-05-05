@@ -1,6 +1,5 @@
 import {writeFile, mkdir} from 'node:fs/promises';
 import {join} from 'node:path';
-import type {ApiClient} from '../api/client';
 import type {ZhihuApi} from '../api/zhihu-api';
 import {
 	extractArticleMetadata,
@@ -17,7 +16,6 @@ import type {DownloadOptions, DownloadResult} from './types';
 export async function downloadArticle(
 	articleId: string,
 	api: ZhihuApi,
-	_client: ApiClient,
 	options: DownloadOptions,
 ): Promise<DownloadResult> {
 	const {outputDir, downloadImages: shouldDownloadImages, onProgress} = options;

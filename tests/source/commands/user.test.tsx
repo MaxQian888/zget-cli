@@ -63,7 +63,7 @@ beforeEach(() => {
 describe('UserCommand', () => {
 	it('shows user batch progress and summary after the download finishes', async () => {
 		mocks.downloadUserContent.mockImplementation(
-			async (_userId: string, _api: unknown, _client: unknown, options) => {
+			async (_userId: string, _api: unknown, options) => {
 				options.onBatchProgress({
 					completed: 1,
 					failed: 0,

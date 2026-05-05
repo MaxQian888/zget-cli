@@ -120,6 +120,30 @@ describe('XhsInteractCommand', () => {
 		expect(frame).toContain('"target": "note-json"');
 	});
 
+	it('emits a structured json failure when an action rejects', async () => {
+		mocks.api.likeNote.mockRejectedValue(new Error('Permission denied'));
+
+		const view = render(
+			<XhsInteractCommand
+				interactType="xhs-like"
+				target="note-fail"
+				flags={baseFlags}
+				format="json"
+			/>,
+		);
+
+		await flushAsync();
+
+		const frame = view.lastFrame() ?? '';
+		const parsed = JSON.parse(frame) as {
+			ok: boolean;
+			error: {code: number; message: string};
+		};
+		expect(parsed.ok).toBe(false);
+		expect(parsed.error.code).toBe(77);
+		expect(parsed.error.message).toBe('Permission denied');
+	});
+
 	it('shows an error when comment text is missing', async () => {
 		const view = render(
 			<XhsInteractCommand

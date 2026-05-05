@@ -77,7 +77,7 @@ export async function downloadColumn(
 		try {
 			let result;
 			if (item.type === 'article') {
-				result = await downloadArticle(itemId, api, client, itemOptions);
+				result = await downloadArticle(itemId, api, itemOptions);
 			} else if (item.type === 'answer' && item.question) {
 				result = await downloadAnswer(
 					String(item.question.id),

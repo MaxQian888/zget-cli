@@ -61,12 +61,7 @@ export default function DownloadCommand({type, url, flags}: Props) {
 						parsed.platform === 'zhihu' && parsed.type === 'article'
 							? parsed.articleId
 							: url;
-					downloadResult = await downloadArticle(
-						articleId,
-						api,
-						client,
-						options,
-					);
+					downloadResult = await downloadArticle(articleId, api, options);
 				} else if (type === 'answer') {
 					const parsed = parseZhihuUrl(url);
 					if (!(parsed.platform === 'zhihu' && parsed.type === 'answer')) {

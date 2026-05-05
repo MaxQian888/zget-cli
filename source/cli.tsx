@@ -27,6 +27,10 @@ const cliParserFlags = {
 		type: cliFlags.images.type,
 		default: cliFlags.images.default,
 	},
+	image: {
+		type: cliFlags.image.type,
+		isMultiple: true as const,
+	},
 	cookies: {
 		type: cliFlags.cookies.type,
 		default: cliFlags.cookies.default,
@@ -171,10 +175,12 @@ export function resolveCommand(
 		verbose,
 		resume,
 		images,
+		image: imageMulti,
 		cookies: rawCookies,
 		limit,
 		format: rawFormat,
 		text: rawText,
+		content: rawContent,
 	} = cli.flags;
 	const flags = {
 		output,
@@ -185,6 +191,11 @@ export function resolveCommand(
 	};
 	const format: 'human' | 'json' = rawFormat === 'json' ? 'json' : 'human';
 	const text = rawText || undefined;
+	const imageList: string[] | undefined =
+		Array.isArray(imageMulti) && imageMulti.length > 0
+			? imageMulti.filter(Boolean)
+			: undefined;
+	const content = rawContent ? String(rawContent) : undefined;
 	const {input} = cli;
 	const [first, second, third] = input;
 
@@ -387,6 +398,28 @@ export function resolveCommand(
 				stderr,
 				exit,
 			);
+		}
+
+		if (cmd === 'xhs-post') {
+			if (!imageList || imageList.length === 0) {
+				exitWithError(
+					'Error: xhs post requires at least one --image <path>\n',
+					stderr,
+					exit,
+				);
+			}
+
+			return {
+				command: cmd,
+				url: third,
+				flags,
+				limit,
+				format,
+				text: text ?? undefined,
+				images: imageList,
+				content,
+				extraArgs: cli.input.slice(3),
+			};
 		}
 
 		return {

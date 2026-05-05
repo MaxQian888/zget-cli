@@ -99,4 +99,28 @@ describe('XhsPublishCommand', () => {
 		expect(frame).toContain('未登录，请先运行 "zget xhs login"');
 		expect(frame).toContain('请确保已登录创作者中心');
 	});
+
+	it('emits a structured json failure when the publish call rejects', async () => {
+		mocks.api.publishImageNote.mockRejectedValue(new Error('图片上传超时'));
+
+		const view = render(
+			<XhsPublishCommand
+				title="失败笔记"
+				images={['x.jpg']}
+				flags={baseFlags}
+				format="json"
+			/>,
+		);
+
+		await flushAsync();
+
+		const frame = view.lastFrame() ?? '';
+		const parsed = JSON.parse(frame) as {
+			ok: boolean;
+			error: {code: number; message: string};
+		};
+		expect(parsed.ok).toBe(false);
+		expect(parsed.error.message).toBe('图片上传超时');
+		expect(parsed.error.code).toBe(75);
+	});
 });

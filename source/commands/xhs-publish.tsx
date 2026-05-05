@@ -6,6 +6,13 @@ import {useInkApp} from '../core/utils/ink-app';
 import {XhsCookieStore} from '../core/auth/xhs-auth';
 import {XhsApi} from '../core/api/xhs-api';
 import ErrorDisplay from '../components/error-display';
+import {
+	CliError,
+	ExitCode,
+	type ExitCodeValue,
+	getErrorHint,
+	getExitCode,
+} from '../core/utils/exit-codes';
 import type {GlobalFlags} from './types';
 
 type Props = {
@@ -32,13 +39,18 @@ export default function XhsPublishCommand({
 	useRunOnceEffect(() => {
 		const run = async () => {
 			let xhsApi: XhsApi | undefined;
+			let pendingExitCode: ExitCodeValue = ExitCode.OK;
 			try {
 				const cookieStore = new XhsCookieStore();
 				await cookieStore.load();
 				if (flags.cookies) cookieStore.parseCookieString(flags.cookies);
 
 				if (!cookieStore.isAuthenticated()) {
-					throw new Error('未登录，请先运行 "zget xhs login"');
+					throw new CliError(
+						'未登录，请先运行 "zget xhs login"',
+						ExitCode.NOPERM,
+						'运行 zget xhs login',
+					);
 				}
 
 				xhsApi = new XhsApi(cookieStore);
@@ -51,18 +63,32 @@ export default function XhsPublishCommand({
 				);
 
 				if (format === 'json') {
-					setJsonOutput(JSON.stringify(result, null, 2));
+					setJsonOutput(JSON.stringify({ok: true, data: result}, null, 2));
 				}
 
 				setResultMessage(`笔记已发布 (ID: ${result.noteId})`);
 				setLoading(false);
 			} catch (error_: unknown) {
-				setError(error_ instanceof Error ? error_.message : String(error_));
+				const message =
+					error_ instanceof Error ? error_.message : String(error_);
+				pendingExitCode = getExitCode(error_);
+				const hint = getErrorHint(error_);
+				setError(message);
+				if (format === 'json') {
+					setJsonOutput(
+						JSON.stringify(
+							{ok: false, error: {code: pendingExitCode, message, hint}},
+							null,
+							2,
+						),
+					);
+				}
+
 				setLoading(false);
 			} finally {
 				if (xhsApi) await xhsApi.close();
 				setTimeout(() => {
-					exit();
+					exit(pendingExitCode);
 				}, 100);
 			}
 		};
