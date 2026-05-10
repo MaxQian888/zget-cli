@@ -54,6 +54,56 @@ const cliParserFlags = {
 		type: 'string' as const,
 		default: cliFlags.content.default,
 	},
+	cookie: {
+		type: 'string' as const,
+		default: cliFlags.cookie.default,
+	},
+	detail: {
+		type: 'string' as const,
+		alias: 'd',
+		default: cliFlags.detail.default,
+	},
+	topic: {
+		type: 'string' as const,
+		isMultiple: true as const,
+	},
+	neutral: {
+		type: 'boolean' as const,
+		default: cliFlags.neutral.default,
+	},
+	unfollow: {
+		type: 'boolean' as const,
+		default: cliFlags.unfollow.default,
+	},
+	reply: {
+		type: 'string' as const,
+		default: cliFlags.reply.default,
+	},
+	yes: {
+		type: 'boolean' as const,
+		alias: 'y',
+		default: cliFlags.yes.default,
+	},
+	type: {
+		type: 'string' as const,
+		default: cliFlags.type.default,
+	},
+	sort: {
+		type: 'string' as const,
+		default: cliFlags.sort.default,
+	},
+	comments: {
+		type: 'boolean' as const,
+		default: cliFlags.comments.default,
+	},
+	questions: {
+		type: 'boolean' as const,
+		default: cliFlags.questions.default,
+	},
+	offset: {
+		type: 'number' as const,
+		default: cliFlags.offset.default,
+	},
 };
 
 type CliParserFlags = typeof cliParserFlags;
@@ -160,6 +210,277 @@ function exitWithError(
 	return exit(1);
 }
 
+type ZhihuSubcommandContext = {
+	flags: ResolvedCommand['flags'];
+	format: 'human' | 'json';
+	limit?: number;
+	offset?: number;
+	text?: string;
+	content?: string;
+	images?: string[];
+	cookie?: string;
+	detail?: string;
+	topics?: string[];
+	neutral: boolean;
+	unfollow: boolean;
+	reply?: string;
+	yes: boolean;
+};
+
+const zhihuFollowTargets = new Set(['user', 'question', 'column']);
+
+// eslint-disable-next-line complexity
+function resolveZhihuSubcommand(
+	input: string[],
+	context: ZhihuSubcommandContext,
+	stderr: Pick<typeof process.stderr, 'write'>,
+	exit: (code: number) => never,
+): ResolvedCommand {
+	const sub = input[1];
+	const arg1 = input[2];
+	const arg2 = input[3];
+	const {
+		flags,
+		format,
+		limit,
+		offset,
+		text,
+		content,
+		images,
+		cookie,
+		detail,
+		topics,
+		neutral,
+		unfollow,
+		reply,
+		yes,
+	} = context;
+
+	const baseExtras = (extra: string[] = []) => ({
+		flags,
+		format,
+		limit,
+		offset,
+		extraArgs: extra,
+	});
+
+	if (!sub) {
+		exitWithError(
+			'Error: zhihu requires a subcommand (login, vote, follow, ask, …)\n',
+			stderr,
+			exit,
+		);
+	}
+
+	switch (sub) {
+		case 'login': {
+			return {command: 'zhihu-login', ...baseExtras(), cookie};
+		}
+
+		case 'logout': {
+			return {command: 'zhihu-logout', ...baseExtras()};
+		}
+
+		case 'whoami': {
+			return {command: 'zhihu-whoami', ...baseExtras()};
+		}
+
+		case 'status': {
+			return {command: 'zhihu-status', ...baseExtras()};
+		}
+
+		case 'vote': {
+			if (!arg1) {
+				exitWithError(
+					'Error: zhihu vote requires an answer ID\n',
+					stderr,
+					exit,
+				);
+			}
+
+			return {
+				command: 'zhihu-vote',
+				url: arg1,
+				...baseExtras(),
+				neutral,
+			};
+		}
+
+		case 'follow':
+		case 'unfollow': {
+			if (!arg1 || !arg2 || !zhihuFollowTargets.has(arg1)) {
+				exitWithError(
+					'Error: zhihu follow {user|question|column} <id>\n',
+					stderr,
+					exit,
+				);
+			}
+
+			return {
+				command:
+					sub === 'unfollow' || unfollow ? 'zhihu-unfollow' : 'zhihu-follow',
+				url: arg2,
+				extraArgs: [arg1],
+				flags,
+				format,
+				limit,
+				offset,
+			};
+		}
+
+		case 'comment': {
+			if (!arg1) {
+				exitWithError(
+					'Error: zhihu comment requires a target ID\n',
+					stderr,
+					exit,
+				);
+			}
+
+			if (!text) {
+				exitWithError(
+					'Error: zhihu comment requires -t "<text>"\n',
+					stderr,
+					exit,
+				);
+			}
+
+			return {
+				command: 'zhihu-comment',
+				url: arg1,
+				...baseExtras(),
+				text,
+				reply,
+			};
+		}
+
+		case 'comments': {
+			if (!arg1) {
+				exitWithError(
+					'Error: zhihu comments requires a target ID\n',
+					stderr,
+					exit,
+				);
+			}
+
+			return {command: 'zhihu-comments', url: arg1, ...baseExtras()};
+		}
+
+		case 'uncomment': {
+			if (!arg1) {
+				exitWithError(
+					'Error: zhihu uncomment requires a comment ID\n',
+					stderr,
+					exit,
+				);
+			}
+
+			return {command: 'zhihu-uncomment', url: arg1, ...baseExtras()};
+		}
+
+		case 'followers':
+		case 'following':
+		case 'collections': {
+			if (!arg1) {
+				exitWithError(
+					`Error: zhihu ${sub} requires a user token\n`,
+					stderr,
+					exit,
+				);
+			}
+
+			return {
+				command: `zhihu-${sub}` as ResolvedCommand['command'],
+				url: arg1,
+				...baseExtras(),
+			};
+		}
+
+		case 'notifications': {
+			return {command: 'zhihu-notifications', ...baseExtras()};
+		}
+
+		case 'drafts': {
+			return {command: 'zhihu-drafts', ...baseExtras()};
+		}
+
+		case 'ask': {
+			if (!arg1) {
+				exitWithError(
+					'Error: zhihu ask requires a title argument\n',
+					stderr,
+					exit,
+				);
+			}
+
+			return {
+				command: 'zhihu-ask',
+				url: arg1,
+				...baseExtras(),
+				detail,
+				topics,
+				images,
+			};
+		}
+
+		case 'pin': {
+			if (!arg1) {
+				exitWithError(
+					'Error: zhihu pin requires a title argument\n',
+					stderr,
+					exit,
+				);
+			}
+
+			return {
+				command: 'zhihu-pin',
+				url: arg1,
+				...baseExtras(),
+				content,
+				images,
+			};
+		}
+
+		case 'publish-article': {
+			if (!arg1 || !arg2) {
+				exitWithError(
+					'Error: zhihu publish-article requires "<title>" "<content>"\n',
+					stderr,
+					exit,
+				);
+			}
+
+			return {
+				command: 'zhihu-publish-article',
+				url: arg1,
+				...baseExtras(),
+				content: arg2,
+				topics,
+				images,
+			};
+		}
+
+		case 'delete-question':
+		case 'delete-pin':
+		case 'delete-article': {
+			if (!arg1) {
+				exitWithError(`Error: zhihu ${sub} requires an ID\n`, stderr, exit);
+			}
+
+			return {
+				command: `zhihu-${sub}` as ResolvedCommand['command'],
+				url: arg1,
+				...baseExtras(),
+				yes,
+			};
+		}
+
+		default: {
+			exitWithError(`Error: unknown zhihu subcommand: ${sub}\n`, stderr, exit);
+		}
+	}
+}
+
 // The CLI routes many command families in one place, so keeping this dispatcher
 // explicit is clearer than splitting it into indirection-heavy helpers.
 // eslint-disable-next-line complexity
@@ -181,6 +502,18 @@ export function resolveCommand(
 		format: rawFormat,
 		text: rawText,
 		content: rawContent,
+		cookie: rawCookie,
+		detail: rawDetail,
+		topic: topicMulti,
+		neutral: rawNeutral,
+		unfollow: rawUnfollow,
+		reply: rawReply,
+		yes: rawYes,
+		type: rawType,
+		sort: rawSort,
+		comments: rawComments,
+		questions: rawQuestions,
+		offset: rawOffset,
 	} = cli.flags;
 	const flags = {
 		output,
@@ -196,6 +529,22 @@ export function resolveCommand(
 			? imageMulti.filter(Boolean)
 			: undefined;
 	const content = rawContent ? String(rawContent) : undefined;
+	const cookie = rawCookie ? String(rawCookie) : undefined;
+	const detail = rawDetail ? String(rawDetail) : undefined;
+	const topics: string[] | undefined =
+		Array.isArray(topicMulti) && topicMulti.length > 0
+			? topicMulti.filter(Boolean)
+			: undefined;
+	const neutral = Boolean(rawNeutral);
+	const unfollow = Boolean(rawUnfollow);
+	const reply = rawReply ? String(rawReply) : undefined;
+	const yes = Boolean(rawYes);
+	const searchType = rawType ? String(rawType) : undefined;
+	const sortBy = rawSort ? String(rawSort) : undefined;
+	const includeComments = Boolean(rawComments);
+	const includeQuestions = Boolean(rawQuestions);
+	const offset =
+		typeof rawOffset === 'number' && rawOffset > 0 ? rawOffset : undefined;
 	const {input} = cli;
 	const [first, second, third] = input;
 
@@ -203,9 +552,9 @@ export function resolveCommand(
 		return {command: 'ui-home', flags};
 	}
 
-	// Login
+	// Login (top-level Zhihu login). --cookie supports manual cookie import.
 	if (first === 'login') {
-		return {command: 'login', flags};
+		return {command: 'login', flags, cookie};
 	}
 
 	// --- X (Twitter) commands ---
@@ -433,6 +782,31 @@ export function resolveCommand(
 		};
 	}
 
+	// --- Zhihu subcommand family (zget zhihu <verb>) ---
+	if (first === 'zhihu') {
+		return resolveZhihuSubcommand(
+			cli.input,
+			{
+				flags,
+				format,
+				limit,
+				offset,
+				text,
+				content,
+				images: imageList,
+				cookie,
+				detail,
+				topics,
+				neutral,
+				unfollow,
+				reply,
+				yes,
+			},
+			stderr,
+			exit,
+		);
+	}
+
 	// Browse commands (no URL needed for hot/feed)
 	if (browseCommands.has(first)) {
 		const browseCommandsWithoutArguments = new Set(['hot', 'feed']);
@@ -440,12 +814,19 @@ export function resolveCommand(
 			exitWithError(`Error: ${first} requires an argument\n`, stderr, exit);
 		}
 
-		return {
+		const resolved: ResolvedCommand = {
 			command: first as ResolvedCommand['command'],
 			url: second,
 			flags,
 			limit,
 		};
+		if (format !== 'human') resolved.format = format;
+		if (searchType) resolved.searchType = searchType;
+		if (sortBy) resolved.sortBy = sortBy;
+		if (includeComments) resolved.includeComments = includeComments;
+		if (includeQuestions) resolved.includeQuestions = includeQuestions;
+		if (offset !== undefined) resolved.offset = offset;
+		return resolved;
 	}
 
 	// Download commands with explicit subcommand

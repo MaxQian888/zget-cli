@@ -4,10 +4,23 @@ import {Spinner} from '@inkjs/ui';
 import {useRunOnceEffect} from '../core/utils/run-once-effect';
 import {ApiClient} from '../core/api/client';
 import {ZhihuApi} from '../core/api/zhihu-api';
+import type {ZhihuAnswerSort, ZhihuSearchType} from '../core/api/types';
 import {CookieStore} from '../core/auth/cookie-store';
 import {useInkApp} from '../core/utils/ink-app';
 import ErrorDisplay from '../components/error-display';
 import type {GlobalFlags} from './types';
+
+const validSearchTypes = new Set<ZhihuSearchType>([
+	'general',
+	'topic',
+	'people',
+]);
+const validAnswerSorts = new Set<ZhihuAnswerSort>([
+	'default',
+	'updated',
+	'voteups',
+	'created',
+]);
 
 type BrowseType =
 	| 'search'
@@ -26,6 +39,11 @@ type Props = {
 	readonly query: string;
 	readonly flags: GlobalFlags;
 	readonly limit?: number;
+	readonly searchType?: string;
+	readonly sortBy?: string;
+	readonly hasComments?: boolean;
+	readonly hasQuestions?: boolean;
+	readonly offset?: number;
 };
 
 function stripHtml(text: string): string {
@@ -51,7 +69,22 @@ export default function BrowseCommand({
 	query,
 	flags,
 	limit = 10,
+	searchType,
+	sortBy,
+	hasComments = false,
+	hasQuestions = false,
+	offset = 0,
 }: Props) {
+	const resolvedSearchType: ZhihuSearchType = validSearchTypes.has(
+		searchType as ZhihuSearchType,
+	)
+		? (searchType as ZhihuSearchType)
+		: 'general';
+	const resolvedSort: ZhihuAnswerSort = validAnswerSorts.has(
+		sortBy as ZhihuAnswerSort,
+	)
+		? (sortBy as ZhihuAnswerSort)
+		: 'default';
 	const {exit} = useInkApp();
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | undefined>();
@@ -73,8 +106,17 @@ export default function BrowseCommand({
 
 				switch (browseType) {
 					case 'search': {
-						setTitle(`搜索: ${query}`);
-						const {items} = await api.search(query, 'general', 0, limit);
+						const titleSuffix =
+							resolvedSearchType === 'general'
+								? ''
+								: ` [${resolvedSearchType}]`;
+						setTitle(`搜索: ${query}${titleSuffix}`);
+						const {items} = await api.search(
+							query,
+							resolvedSearchType,
+							offset,
+							limit,
+						);
 						for (const [i, item] of items.entries()) {
 							const hl = item.highlight as Record<string, string> | undefined;
 							const t = String(hl?.title ?? item.title ?? item.name ?? '');
@@ -121,8 +163,15 @@ export default function BrowseCommand({
 					}
 
 					case 'answers': {
-						setTitle(`问题 ${query} 的回答`);
-						const {items} = await api.getQuestionAnswers(query, 0, limit);
+						const sortSuffix =
+							resolvedSort === 'default' ? '' : ` (sort: ${resolvedSort})`;
+						setTitle(`问题 ${query} 的回答${sortSuffix}`);
+						const {items} = await api.getQuestionAnswers(
+							query,
+							offset,
+							limit,
+							resolvedSort,
+						);
 						for (const [i, item] of items.entries()) {
 							const author =
 								(item.author as Record<string, unknown>)?.name ?? 'Anon';
@@ -157,6 +206,24 @@ export default function BrowseCommand({
 							{key: '赞同', value: formatCount(Number(a.voteup_count ?? 0))},
 							{key: '评论', value: formatCount(Number(a.comment_count ?? 0))},
 						);
+						if (hasComments) {
+							const {items: comments} = await api.listComments(
+								'answer',
+								query,
+								0,
+								Math.min(limit, 10),
+							);
+							for (const [i, c] of comments.entries()) {
+								results.push({
+									key: `评 ${i + 1}`,
+									value: `${c.author.name}: ${truncate(
+										stripHtml(c.content),
+										80,
+									)}`,
+								});
+							}
+						}
+
 						break;
 					}
 
@@ -187,6 +254,19 @@ export default function BrowseCommand({
 							},
 							{key: '关注', value: formatCount(Number(t.followers_count ?? 0))},
 						);
+						if (hasQuestions) {
+							const {items: questions} = await api.getTopicQuestions(
+								query,
+								0,
+								Math.min(limit, 10),
+							);
+							for (const [i, q] of questions.entries()) {
+								const target = q.target as Record<string, unknown> | undefined;
+								const title = String(target?.title ?? q.title ?? '');
+								results.push({key: `问 ${i + 1}`, value: title});
+							}
+						}
+
 						break;
 					}
 

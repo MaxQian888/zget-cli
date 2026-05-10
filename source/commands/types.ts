@@ -85,6 +85,32 @@ export type CommandName =
 	| 'bili-whoami'
 	| 'bili-logout'
 	| 'bili-download'
+	// Zhihu Account
+	| 'zhihu-login'
+	| 'zhihu-logout'
+	| 'zhihu-whoami'
+	| 'zhihu-status'
+	// Zhihu Interact
+	| 'zhihu-vote'
+	| 'zhihu-follow'
+	| 'zhihu-unfollow'
+	| 'zhihu-comment'
+	| 'zhihu-comments'
+	| 'zhihu-uncomment'
+	// Zhihu Lists
+	| 'zhihu-followers'
+	| 'zhihu-following'
+	| 'zhihu-collections'
+	| 'zhihu-notifications'
+	| 'zhihu-drafts'
+	// Zhihu Create
+	| 'zhihu-ask'
+	| 'zhihu-pin'
+	| 'zhihu-publish-article'
+	// Zhihu Delete
+	| 'zhihu-delete-question'
+	| 'zhihu-delete-pin'
+	| 'zhihu-delete-article'
 	// AI Summary
 	| 'summary'
 	// Meta
@@ -101,4 +127,17 @@ export type ResolvedCommand = {
 	format?: 'human' | 'json';
 	images?: string[];
 	content?: string;
+	// Zhihu-specific options propagated from CLI flags
+	cookie?: string;
+	detail?: string;
+	topics?: string[];
+	neutral?: boolean;
+	unfollow?: boolean;
+	reply?: string;
+	yes?: boolean;
+	searchType?: string;
+	sortBy?: string;
+	includeComments?: boolean;
+	includeQuestions?: boolean;
+	offset?: number;
 };

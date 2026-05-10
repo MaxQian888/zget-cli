@@ -8,9 +8,25 @@
 
 > `const` **cliFlags**: `object`
 
-Defined in: cli-metadata.ts:3
+Defined in: [cli-metadata.ts:3](https://github.com/AstroAir/react-cli-quick-starter/blob/main/source/cli-metadata.ts#L3)
 
 ## Type Declaration
+
+### comments
+
+> **comments**: `object`
+
+#### comments.default
+
+> **default**: `boolean` = `false`
+
+#### comments.description
+
+> **description**: `string` = `'Include comments in answer view'`
+
+#### comments.type
+
+> **type**: `"boolean"`
 
 ### content
 
@@ -28,6 +44,22 @@ Defined in: cli-metadata.ts:3
 
 > **type**: `"string"`
 
+### cookie
+
+> **cookie**: `object`
+
+#### cookie.default
+
+> **default**: `string` = `''`
+
+#### cookie.description
+
+> **description**: `string` = `'Cookie string for "zhihu login --cookie" (alias of --cookies, single platform)'`
+
+#### cookie.type
+
+> **type**: `"string"`
+
 ### cookies
 
 > **cookies**: `object`
@@ -41,6 +73,26 @@ Defined in: cli-metadata.ts:3
 > **description**: `string` = `'Cookie string (overrides saved cookies)'`
 
 #### cookies.type
+
+> **type**: `"string"`
+
+### detail
+
+> **detail**: `object`
+
+#### detail.default
+
+> **default**: `string` = `''`
+
+#### detail.description
+
+> **description**: `string` = `'Detail body for "zhihu ask" (HTML allowed)'`
+
+#### detail.shortFlag
+
+> **shortFlag**: `string` = `'d'`
+
+#### detail.type
 
 > **type**: `"string"`
 
@@ -120,6 +172,38 @@ Defined in: cli-metadata.ts:3
 
 > **type**: `"number"`
 
+### neutral
+
+> **neutral**: `object`
+
+#### neutral.default
+
+> **default**: `boolean` = `false`
+
+#### neutral.description
+
+> **description**: `string` = `'Cancel vote (used with "zhihu vote")'`
+
+#### neutral.type
+
+> **type**: `"boolean"`
+
+### offset
+
+> **offset**: `object`
+
+#### offset.default
+
+> **default**: `number` = `0`
+
+#### offset.description
+
+> **description**: `string` = `'Offset for paginated browse commands'`
+
+#### offset.type
+
+> **type**: `"number"`
+
 ### output
 
 > **output**: `object`
@@ -140,6 +224,38 @@ Defined in: cli-metadata.ts:3
 
 > **type**: `"string"`
 
+### questions
+
+> **questions**: `object`
+
+#### questions.default
+
+> **default**: `boolean` = `false`
+
+#### questions.description
+
+> **description**: `string` = `'Include top questions in topic view'`
+
+#### questions.type
+
+> **type**: `"boolean"`
+
+### reply
+
+> **reply**: `object`
+
+#### reply.default
+
+> **default**: `string` = `''`
+
+#### reply.description
+
+> **description**: `string` = `'Reply to a comment ID (used with "zhihu comment")'`
+
+#### reply.type
+
+> **type**: `"string"`
+
 ### resume
 
 > **resume**: `object`
@@ -155,6 +271,22 @@ Defined in: cli-metadata.ts:3
 #### resume.type
 
 > **type**: `"boolean"`
+
+### sort
+
+> **sort**: `object`
+
+#### sort.default
+
+> **default**: `string` = `''`
+
+#### sort.description
+
+> **description**: `string` = `'Sort key: user-answers {default|voteups|created|updated}'`
+
+#### sort.type
+
+> **type**: `"string"`
 
 ### text
 
@@ -176,6 +308,58 @@ Defined in: cli-metadata.ts:3
 
 > **type**: `"string"`
 
+### topic
+
+> **topic**: `object`
+
+#### topic.default
+
+> **default**: `string` = `''`
+
+#### topic.description
+
+> **description**: `string` = `'Topic ID for "zhihu ask"/"zhihu publish-article" (repeatable)'`
+
+#### topic.isMultiple
+
+> **isMultiple**: `boolean` = `true`
+
+#### topic.type
+
+> **type**: `"string"`
+
+### type
+
+> **type**: `object`
+
+#### type.default
+
+> **default**: `string` = `''`
+
+#### type.description
+
+> **description**: `string` = `'Filter type: search {general|topic|people}'`
+
+#### type.type
+
+> **type**: `"string"`
+
+### unfollow
+
+> **unfollow**: `object`
+
+#### unfollow.default
+
+> **default**: `boolean` = `false`
+
+#### unfollow.description
+
+> **description**: `string` = `'Unfollow instead of follow (used with "zhihu follow")'`
+
+#### unfollow.type
+
+> **type**: `"boolean"`
+
 ### verbose
 
 > **verbose**: `object`
@@ -193,5 +377,25 @@ Defined in: cli-metadata.ts:3
 > **shortFlag**: `string` = `'v'`
 
 #### verbose.type
+
+> **type**: `"boolean"`
+
+### yes
+
+> **yes**: `object`
+
+#### yes.default
+
+> **default**: `boolean` = `false`
+
+#### yes.description
+
+> **description**: `string` = `'Skip confirmation for destructive actions'`
+
+#### yes.shortFlag
+
+> **shortFlag**: `string` = `'y'`
+
+#### yes.type
 
 > **type**: `"boolean"`

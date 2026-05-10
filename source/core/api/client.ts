@@ -116,6 +116,89 @@ export class ApiClient {
 		return response.json() as Promise<T>;
 	}
 
+	async putJson<T>(url: string, body: Record<string, unknown>): Promise<T> {
+		await this.throttle();
+		const headers = this.getHeaders();
+		headers['Content-Type'] = 'application/json';
+
+		const response = await fetch(url, {
+			method: 'PUT',
+			headers,
+			body: JSON.stringify(body),
+		});
+
+		if (!response.ok) {
+			throw new Error(
+				`PUT request failed: ${response.status} ${response.statusText} (${url})`,
+			);
+		}
+
+		const text = await response.text();
+		return JSON.parse(text || '{}') as T;
+	}
+
+	async patchJson<T>(url: string, body: Record<string, unknown>): Promise<T> {
+		await this.throttle();
+		const headers = this.getHeaders();
+		headers['Content-Type'] = 'application/json';
+
+		const response = await fetch(url, {
+			method: 'PATCH',
+			headers,
+			body: JSON.stringify(body),
+		});
+
+		if (!response.ok) {
+			throw new Error(
+				`PATCH request failed: ${response.status} ${response.statusText} (${url})`,
+			);
+		}
+
+		const text = await response.text();
+		return JSON.parse(text || '{}') as T;
+	}
+
+	async deleteJson<T>(url: string): Promise<T> {
+		await this.throttle();
+		const response = await fetch(url, {
+			method: 'DELETE',
+			headers: this.getHeaders(),
+		});
+
+		if (!response.ok) {
+			throw new Error(
+				`DELETE request failed: ${response.status} ${response.statusText} (${url})`,
+			);
+		}
+
+		const text = await response.text();
+		return JSON.parse(text || '{}') as T;
+	}
+
+	// Raw PUT for binary body (used by OSS image upload). Headers passed in
+	// fully override defaults — OSS rejects extra browser headers.
+	async putBuffer(
+		url: string,
+		body: Buffer,
+		headers: Record<string, string>,
+	): Promise<{status: number; headers: Headers}> {
+		await this.throttle();
+		const response = await fetch(url, {
+			method: 'PUT',
+			headers,
+			body: new Uint8Array(body),
+		});
+
+		if (!response.ok) {
+			const errorText = await response.text().catch(() => '');
+			throw new Error(
+				`OSS PUT failed: ${response.status} ${response.statusText} ${errorText} (${url})`,
+			);
+		}
+
+		return {status: response.status, headers: response.headers};
+	}
+
 	private async throttle(): Promise<void> {
 		const now = Date.now();
 		const elapsed = now - this.lastRequestTime;

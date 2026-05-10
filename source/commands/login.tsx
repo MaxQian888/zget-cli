@@ -3,6 +3,9 @@ import {useState} from 'react';
 import QRCode from 'qrcode';
 import {useRunOnceEffect} from '../core/utils/run-once-effect';
 import {performQrLogin} from '../core/auth/qr-login';
+import {CookieStore} from '../core/auth/cookie-store';
+import {ApiClient} from '../core/api/client';
+import {ZhihuApi} from '../core/api/zhihu-api';
 import {useInkApp} from '../core/utils/ink-app';
 import QrCodeStatus from '../components/qr-code';
 import type {GlobalFlags} from './types';
@@ -17,9 +20,10 @@ type QrStatus =
 
 type Props = {
 	readonly flags: GlobalFlags;
+	readonly cookie?: string;
 };
 
-export default function LoginCommand({flags: _flags}: Props) {
+export default function LoginCommand({flags, cookie}: Props) {
 	const {exit} = useInkApp();
 	const [status, setStatus] = useState<QrStatus>('loading');
 	const [qrDisplay, setQrDisplay] = useState<string>('');
@@ -29,6 +33,26 @@ export default function LoginCommand({flags: _flags}: Props) {
 	useRunOnceEffect(() => {
 		const run = async () => {
 			try {
+				const cookieString = cookie ?? flags.cookies;
+				if (cookieString) {
+					const store = new CookieStore();
+					store.parseCookieString(cookieString);
+					if (!store.isAuthenticated()) {
+						throw new Error('Cookie 缺少必需字段（z_c0 / _xsrf / d_c0）');
+					}
+
+					const result = await new ZhihuApi(
+						new ApiClient({cookieStore: store}),
+					).validateSession();
+					if (!result.valid) {
+						throw new Error('未登录：cookie 已失效');
+					}
+
+					await store.save();
+					setStatus('confirmed');
+					return;
+				}
+
 				await performQrLogin({
 					async onQrReady(link) {
 						setQrLink(link);

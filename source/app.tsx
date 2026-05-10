@@ -15,6 +15,12 @@ import XhsInteractCommand from './commands/xhs-interact';
 import XhsDownloadCommand from './commands/xhs-download';
 import XhsLoginCommand from './commands/xhs-login';
 import XhsPublishCommand from './commands/xhs-publish';
+import ZhihuAccountCommand from './commands/zhihu-account';
+import ZhihuInteractCommand from './commands/zhihu-interact';
+import ZhihuListCommand from './commands/zhihu-list';
+import ZhihuPublishCommand from './commands/zhihu-publish';
+import ZhihuDeleteCommand from './commands/zhihu-delete';
+import type {ZhihuCommentTarget, ZhihuFollowTarget} from './core/api/types';
 import BiliBrowseCommand from './commands/bili-browse';
 import BiliInteractCommand from './commands/bili-interact';
 import BiliDownloadCommand from './commands/bili-download';
@@ -31,7 +37,27 @@ type Props = {
 // The CLI dispatcher keeps the command-to-component routing explicit in one place.
 // eslint-disable-next-line complexity
 export default function App({resolved}: Props) {
-	const {command, url, flags, limit, text, format, images, content} = resolved;
+	const {
+		command,
+		url,
+		flags,
+		limit,
+		text,
+		format,
+		images,
+		content,
+		cookie,
+		detail,
+		topics,
+		neutral,
+		reply,
+		yes,
+		offset,
+		extraArgs,
+	} = resolved;
+
+	const followTarget = (extraArgs?.[0] ?? 'user') as ZhihuFollowTarget;
+	const commentTarget = (extraArgs?.[0] ?? 'answer') as ZhihuCommentTarget;
 
 	switch (command) {
 		// --- Interactive UI ---
@@ -83,7 +109,7 @@ export default function App({resolved}: Props) {
 
 		// --- Auth ---
 		case 'login': {
-			return <LoginCommand flags={flags} />;
+			return <LoginCommand flags={flags} cookie={cookie} />;
 		}
 
 		// --- Browse ---
@@ -102,6 +128,11 @@ export default function App({resolved}: Props) {
 					query={url ?? ''}
 					flags={flags}
 					limit={limit}
+					searchType={resolved.searchType}
+					sortBy={resolved.sortBy}
+					hasComments={resolved.includeComments}
+					hasQuestions={resolved.includeQuestions}
+					offset={offset}
 				/>
 			);
 		}
@@ -262,6 +293,119 @@ export default function App({resolved}: Props) {
 		case 'bili-whoami':
 		case 'bili-logout': {
 			return <BiliLoginCommand mode={command} flags={flags} format={format} />;
+		}
+
+		// --- Zhihu Account ---
+		case 'zhihu-login':
+		case 'zhihu-logout':
+		case 'zhihu-whoami':
+		case 'zhihu-status': {
+			return (
+				<ZhihuAccountCommand
+					kind={command}
+					cookie={cookie}
+					flags={flags}
+					format={format}
+				/>
+			);
+		}
+
+		// --- Zhihu Interact ---
+		case 'zhihu-vote':
+		case 'zhihu-follow':
+		case 'zhihu-unfollow':
+		case 'zhihu-comment':
+		case 'zhihu-uncomment': {
+			return (
+				<ZhihuInteractCommand
+					kind={command}
+					target={url ?? ''}
+					followTarget={followTarget}
+					commentTarget={commentTarget}
+					text={text}
+					reply={reply}
+					isNeutral={neutral}
+					flags={flags}
+					format={format}
+				/>
+			);
+		}
+
+		// --- Zhihu Lists ---
+		case 'zhihu-followers':
+		case 'zhihu-following':
+		case 'zhihu-collections':
+		case 'zhihu-notifications':
+		case 'zhihu-drafts':
+		case 'zhihu-comments': {
+			return (
+				<ZhihuListCommand
+					kind={command}
+					target={url}
+					commentTarget={commentTarget}
+					limit={limit}
+					offset={offset}
+					flags={flags}
+					format={format}
+				/>
+			);
+		}
+
+		// --- Zhihu Create ---
+		case 'zhihu-ask': {
+			return (
+				<ZhihuPublishCommand
+					kind="zhihu-ask"
+					title={url ?? ''}
+					body={detail}
+					topics={topics}
+					images={images}
+					flags={flags}
+					format={format}
+				/>
+			);
+		}
+
+		case 'zhihu-pin': {
+			return (
+				<ZhihuPublishCommand
+					kind="zhihu-pin"
+					title={url ?? ''}
+					body={content}
+					images={images}
+					flags={flags}
+					format={format}
+				/>
+			);
+		}
+
+		case 'zhihu-publish-article': {
+			return (
+				<ZhihuPublishCommand
+					kind="zhihu-publish-article"
+					title={url ?? ''}
+					body={content}
+					topics={topics}
+					images={images}
+					flags={flags}
+					format={format}
+				/>
+			);
+		}
+
+		// --- Zhihu Delete ---
+		case 'zhihu-delete-question':
+		case 'zhihu-delete-pin':
+		case 'zhihu-delete-article': {
+			return (
+				<ZhihuDeleteCommand
+					kind={command}
+					target={url ?? ''}
+					isConfirmed={yes}
+					flags={flags}
+					format={format}
+				/>
+			);
 		}
 
 		// --- AI Summary ---

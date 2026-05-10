@@ -24,15 +24,44 @@ Usage
     $ zget juejin <url>                Download Juejin article
 
   Browse Commands (Zhihu)
-    $ zget search <query>              Search Zhihu
+    $ zget search <query> [--type {general|topic|people}]
     $ zget hot                         Show trending (热榜)
-    $ zget question <id>               Show question details
-    $ zget answers <question_id>       Show answers to a question
+    $ zget question <id> [--questions]
+    $ zget answers <question_id> [--sort {default|voteups|...}]
     $ zget feed                        Show recommended feed
-    $ zget topic <id>                  Show topic details
+    $ zget topic <id> [--questions]    Show topic details
     $ zget user-info <username>        Show user profile
-    $ zget user-answers <username>     Show user's answers
+    $ zget user-answers <username> [--sort voteups]
     $ zget user-articles <username>    Show user's articles
+    $ zget answer <id> [--comments]    Show answer body (with comments)
+
+  Zhihu Account
+    $ zget zhihu login [--cookie "z_c0=…; _xsrf=…; d_c0=…"]
+    $ zget zhihu logout                Clear saved cookies
+    $ zget zhihu status                Local-only auth status
+    $ zget zhihu whoami                Show current user (envelope JSON)
+
+  Zhihu Interact (write operations — requires login)
+    $ zget zhihu vote <answer_id> [--neutral]
+    $ zget zhihu follow {user|question|column} <id> [--unfollow]
+    $ zget zhihu comment <answer_id|article_id> -t "text" [--reply <comment_id>]
+    $ zget zhihu comments <answer_id|article_id>
+    $ zget zhihu uncomment <comment_id>
+
+  Zhihu Lists
+    $ zget zhihu followers <user_token>
+    $ zget zhihu following <user_token>
+    $ zget zhihu collections <user_token>
+    $ zget zhihu notifications [--limit] [--offset]
+    $ zget zhihu drafts
+
+  Zhihu Create (write operations — requires login)
+    $ zget zhihu ask "<title>" [-d "detail"] [--topic <id>]... [--image <path>]...
+    $ zget zhihu pin "<title>" [-c "content"] [--image <path>]...
+    $ zget zhihu publish-article "<title>" "<content_html>" [--topic <id>]... [--image <path>]...
+    $ zget zhihu delete-question <id> [-y]
+    $ zget zhihu delete-pin <id> [-y]
+    $ zget zhihu delete-article <id> [-y]
 
   X (Twitter) Commands
     $ zget x login                     Check/setup X API credentials
@@ -108,6 +137,18 @@ Usage
     --cookies       Cookie string (overrides saved cookies)
     --image         Image path for XHS publish (can repeat)
     --content       Content body for XHS publish
+    --cookie        Cookie string for "zhihu login --cookie" (alias of --cookies, single platform)
+    --detail, -d    Detail body for "zhihu ask" (HTML allowed)
+    --topic         Topic ID for "zhihu ask"/"zhihu publish-article" (repeatable)
+    --neutral       Cancel vote (used with "zhihu vote")
+    --unfollow      Unfollow instead of follow (used with "zhihu follow")
+    --reply         Reply to a comment ID (used with "zhihu comment")
+    --yes, -y       Skip confirmation for destructive actions
+    --type          Filter type: search {general|topic|people}
+    --sort          Sort key: user-answers {default|voteups|created|updated}
+    --comments      Include comments in answer view
+    --questions     Include top questions in topic view
+    --offset        Offset for paginated browse commands
 
   Supported Platforms
     - Zhihu (知乎):        zhuanlan.zhihu.com, www.zhihu.com

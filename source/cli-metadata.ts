@@ -57,6 +57,71 @@ export const cliFlags = {
 		description: 'Content body for XHS publish',
 		default: '',
 	},
+	cookie: {
+		type: 'string' as const,
+		description:
+			'Cookie string for "zhihu login --cookie" (alias of --cookies, single platform)',
+		default: '',
+	},
+	detail: {
+		type: 'string' as const,
+		shortFlag: 'd',
+		description: 'Detail body for "zhihu ask" (HTML allowed)',
+		default: '',
+	},
+	topic: {
+		type: 'string' as const,
+		description:
+			'Topic ID for "zhihu ask"/"zhihu publish-article" (repeatable)',
+		default: '',
+		isMultiple: true,
+	},
+	neutral: {
+		type: 'boolean' as const,
+		description: 'Cancel vote (used with "zhihu vote")',
+		default: false,
+	},
+	unfollow: {
+		type: 'boolean' as const,
+		description: 'Unfollow instead of follow (used with "zhihu follow")',
+		default: false,
+	},
+	reply: {
+		type: 'string' as const,
+		description: 'Reply to a comment ID (used with "zhihu comment")',
+		default: '',
+	},
+	yes: {
+		type: 'boolean' as const,
+		shortFlag: 'y',
+		description: 'Skip confirmation for destructive actions',
+		default: false,
+	},
+	type: {
+		type: 'string' as const,
+		description: 'Filter type: search {general|topic|people}',
+		default: '',
+	},
+	sort: {
+		type: 'string' as const,
+		description: 'Sort key: user-answers {default|voteups|created|updated}',
+		default: '',
+	},
+	comments: {
+		type: 'boolean' as const,
+		description: 'Include comments in answer view',
+		default: false,
+	},
+	questions: {
+		type: 'boolean' as const,
+		description: 'Include top questions in topic view',
+		default: false,
+	},
+	offset: {
+		type: 'number' as const,
+		description: 'Offset for paginated browse commands',
+		default: 0,
+	},
 };
 
 export function buildCliHelpText(): string {
@@ -76,15 +141,44 @@ export function buildCliHelpText(): string {
     $ ${cliName} juejin <url>                Download Juejin article
 
   Browse Commands (Zhihu)
-    $ ${cliName} search <query>              Search Zhihu
+    $ ${cliName} search <query> [--type {general|topic|people}]
     $ ${cliName} hot                         Show trending (热榜)
-    $ ${cliName} question <id>               Show question details
-    $ ${cliName} answers <question_id>       Show answers to a question
+    $ ${cliName} question <id> [--questions]
+    $ ${cliName} answers <question_id> [--sort {default|voteups|...}]
     $ ${cliName} feed                        Show recommended feed
-    $ ${cliName} topic <id>                  Show topic details
+    $ ${cliName} topic <id> [--questions]    Show topic details
     $ ${cliName} user-info <username>        Show user profile
-    $ ${cliName} user-answers <username>     Show user's answers
+    $ ${cliName} user-answers <username> [--sort voteups]
     $ ${cliName} user-articles <username>    Show user's articles
+    $ ${cliName} answer <id> [--comments]    Show answer body (with comments)
+
+  Zhihu Account
+    $ ${cliName} zhihu login [--cookie "z_c0=…; _xsrf=…; d_c0=…"]
+    $ ${cliName} zhihu logout                Clear saved cookies
+    $ ${cliName} zhihu status                Local-only auth status
+    $ ${cliName} zhihu whoami                Show current user (envelope JSON)
+
+  Zhihu Interact (write operations — requires login)
+    $ ${cliName} zhihu vote <answer_id> [--neutral]
+    $ ${cliName} zhihu follow {user|question|column} <id> [--unfollow]
+    $ ${cliName} zhihu comment <answer_id|article_id> -t "text" [--reply <comment_id>]
+    $ ${cliName} zhihu comments <answer_id|article_id>
+    $ ${cliName} zhihu uncomment <comment_id>
+
+  Zhihu Lists
+    $ ${cliName} zhihu followers <user_token>
+    $ ${cliName} zhihu following <user_token>
+    $ ${cliName} zhihu collections <user_token>
+    $ ${cliName} zhihu notifications [--limit] [--offset]
+    $ ${cliName} zhihu drafts
+
+  Zhihu Create (write operations — requires login)
+    $ ${cliName} zhihu ask "<title>" [-d "detail"] [--topic <id>]... [--image <path>]...
+    $ ${cliName} zhihu pin "<title>" [-c "content"] [--image <path>]...
+    $ ${cliName} zhihu publish-article "<title>" "<content_html>" [--topic <id>]... [--image <path>]...
+    $ ${cliName} zhihu delete-question <id> [-y]
+    $ ${cliName} zhihu delete-pin <id> [-y]
+    $ ${cliName} zhihu delete-article <id> [-y]
 
   X (Twitter) Commands
     $ ${cliName} x login                     Check/setup X API credentials
@@ -160,6 +254,18 @@ export function buildCliHelpText(): string {
     --cookies       ${cliFlags.cookies.description}
     --image         ${cliFlags.image.description}
     --content       ${cliFlags.content.description}
+    --cookie        ${cliFlags.cookie.description}
+    --detail, -d    ${cliFlags.detail.description}
+    --topic         ${cliFlags.topic.description}
+    --neutral       ${cliFlags.neutral.description}
+    --unfollow      ${cliFlags.unfollow.description}
+    --reply         ${cliFlags.reply.description}
+    --yes, -y       ${cliFlags.yes.description}
+    --type          ${cliFlags.type.description}
+    --sort          ${cliFlags.sort.description}
+    --comments      ${cliFlags.comments.description}
+    --questions     ${cliFlags.questions.description}
+    --offset        ${cliFlags.offset.description}
 
   Supported Platforms
     - Zhihu (知乎):        zhuanlan.zhihu.com, www.zhihu.com
