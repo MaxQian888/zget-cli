@@ -681,6 +681,110 @@ export function resolveCommand(
 		};
 	}
 
+	// --- Weibo (微博) commands ---
+	if (first === 'weibo') {
+		if (!second) {
+			exitWithError(
+				'Error: weibo requires a subcommand (search, hot, read, login, etc.)\n',
+				stderr,
+				exit,
+			);
+		}
+
+		const weiboCommandMap: Record<string, ResolvedCommand['command']> = {
+			login: 'weibo-login',
+			logout: 'weibo-logout',
+			whoami: 'weibo-whoami',
+			me: 'weibo-whoami',
+			hot: 'weibo-hot',
+			search: 'weibo-search',
+			feed: 'weibo-feed',
+			read: 'weibo-read',
+			show: 'weibo-read',
+			comments: 'weibo-comments',
+			user: 'weibo-user',
+			posts: 'weibo-posts',
+			favorites: 'weibo-favorites',
+			followers: 'weibo-followers',
+			following: 'weibo-following',
+			like: 'weibo-like',
+			unlike: 'weibo-unlike',
+			repost: 'weibo-repost',
+			comment: 'weibo-comment',
+			delete: 'weibo-delete',
+			follow: 'weibo-follow',
+			unfollow: 'weibo-unfollow',
+			post: 'weibo-post',
+			publish: 'weibo-post',
+			download: 'weibo-download',
+		};
+
+		const cmd = weiboCommandMap[second];
+		if (!cmd) {
+			// Maybe it's a URL: weibo https://weibo.com/<uid>/<mid>
+			const parsed = parseUrlImpl(second);
+			if (parsed.platform === 'weibo' && parsed.type === 'status') {
+				return {command: 'weibo-download', url: parsed.idstr, flags, format};
+			}
+
+			if (parsed.platform === 'weibo' && parsed.type === 'user') {
+				return {
+					command: 'weibo-user',
+					url: parsed.uid ?? parsed.screenName ?? second,
+					flags,
+					format,
+				};
+			}
+
+			exitWithError(
+				`Error: unknown weibo subcommand: ${second}\n`,
+				stderr,
+				exit,
+			);
+		}
+
+		const weiboCommandsWithoutArguments = new Set([
+			'hot',
+			'login',
+			'whoami',
+			'me',
+			'logout',
+			'favorites',
+			'feed',
+		]);
+		if (!weiboCommandsWithoutArguments.has(second) && !third) {
+			exitWithError(
+				`Error: weibo ${second} requires an argument\n`,
+				stderr,
+				exit,
+			);
+		}
+
+		if (cmd === 'weibo-post') {
+			return {
+				command: cmd,
+				url: undefined,
+				flags,
+				limit,
+				format,
+				text: text ?? third,
+				images: imageList,
+				content,
+				extraArgs: cli.input.slice(3),
+			};
+		}
+
+		return {
+			command: cmd,
+			url: third,
+			flags,
+			limit,
+			format,
+			text: text ?? undefined,
+			extraArgs: cli.input.slice(3),
+		};
+	}
+
 	// --- AI Summary ---
 	if (first === 'summary') {
 		if (!second) {
@@ -912,6 +1016,28 @@ export function resolveCommand(
 				break;
 			}
 
+			case 'weibo': {
+				if (parsed.type === 'status') {
+					return {
+						command: 'weibo-download',
+						url: parsed.idstr,
+						flags,
+						format,
+					};
+				}
+
+				if (parsed.type === 'user') {
+					return {
+						command: 'weibo-user',
+						url: parsed.uid ?? parsed.screenName ?? first,
+						flags,
+						format,
+					};
+				}
+
+				break;
+			}
+
 			default: {
 				break;
 			}
@@ -920,7 +1046,7 @@ export function resolveCommand(
 
 	stderr.write(`Error: Could not detect content type from: ${first}\n`);
 	stderr.write(
-		'Supported: zhihu, csdn, weixin, juejin, x.com, xiaohongshu.com, bilibili.com URLs or use a subcommand\n',
+		'Supported: zhihu, csdn, weixin, juejin, x.com, xiaohongshu.com, bilibili.com, weibo.com URLs or use a subcommand\n',
 	);
 	return exit(1);
 }

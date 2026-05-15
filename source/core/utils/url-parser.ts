@@ -5,7 +5,8 @@ export type Platform =
 	| 'juejin'
 	| 'x'
 	| 'xhs'
-	| 'bili';
+	| 'bili'
+	| 'weibo';
 
 export type ParsedUrl =
 	// Zhihu
@@ -30,6 +31,15 @@ export type ParsedUrl =
 	// Bilibili
 	| {platform: 'bili'; type: 'video'; bvid: string}
 	| {platform: 'bili'; type: 'user'; mid: string}
+	// Weibo (微博)
+	| {
+			platform: 'weibo';
+			type: 'status';
+			idstr: string;
+			uid?: string;
+			isMblogId?: boolean;
+	  }
+	| {platform: 'weibo'; type: 'user'; uid?: string; screenName?: string}
 	// Unknown
 	| {platform: 'unknown'; type: 'unknown'; raw: string};
 
@@ -159,6 +169,62 @@ export function parseUrl(input: string): ParsedUrl {
 		return {platform: 'bili', type: 'user', mid: biliUserMatch[1]!};
 	}
 
+	// --- Weibo (微博) ---
+	// Status (mobile): m.weibo.cn/status/<idstr>
+	const weiboMobileStatusMatch = /m\.weibo\.cn\/status\/([\w]+)/i.exec(url);
+	if (weiboMobileStatusMatch) {
+		return {
+			platform: 'weibo',
+			type: 'status',
+			idstr: weiboMobileStatusMatch[1]!,
+		};
+	}
+
+	// Status (mobile detail): m.weibo.cn/detail/<idstr>
+	const weiboMobileDetailMatch = /m\.weibo\.cn\/detail\/([\w]+)/i.exec(url);
+	if (weiboMobileDetailMatch) {
+		return {
+			platform: 'weibo',
+			type: 'status',
+			idstr: weiboMobileDetailMatch[1]!,
+		};
+	}
+
+	// User profile (mobile): m.weibo.cn/u/<uid> or m.weibo.cn/profile/<uid>
+	const weiboMobileUserMatch = /m\.weibo\.cn\/(?:u|profile)\/(\d+)/i.exec(url);
+	if (weiboMobileUserMatch) {
+		return {platform: 'weibo', type: 'user', uid: weiboMobileUserMatch[1]!};
+	}
+
+	// Status (desktop): weibo.com/<uid>/<mblogid> — uid digits, mblogid is alnum
+	const weiboDesktopStatusMatch =
+		/(?:^|\/\/|\s)weibo\.com\/(\d+)\/([A-Za-z\d]{6,})(?:[/?#]|$)/i.exec(url);
+	if (weiboDesktopStatusMatch) {
+		return {
+			platform: 'weibo',
+			type: 'status',
+			idstr: weiboDesktopStatusMatch[2]!,
+			uid: weiboDesktopStatusMatch[1]!,
+			isMblogId: true,
+		};
+	}
+
+	// User profile (desktop): weibo.com/u/<uid>
+	const weiboDesktopUserMatch = /weibo\.com\/u\/(\d+)/i.exec(url);
+	if (weiboDesktopUserMatch) {
+		return {platform: 'weibo', type: 'user', uid: weiboDesktopUserMatch[1]!};
+	}
+
+	// User by screen name: weibo.com/n/<name>
+	const weiboNameMatch = /weibo\.com\/n\/([^/?#]+)/i.exec(url);
+	if (weiboNameMatch) {
+		return {
+			platform: 'weibo',
+			type: 'user',
+			screenName: decodeURIComponent(weiboNameMatch[1]!),
+		};
+	}
+
 	return {platform: 'unknown', type: 'unknown', raw: url};
 }
 
@@ -194,6 +260,15 @@ export function buildBiliUserUrl(mid: string): string {
 	return `https://space.bilibili.com/${mid}`;
 }
 
+export function buildWeiboStatusUrl(idstr: string, uid?: string): string {
+	if (uid) return `https://weibo.com/${uid}/${idstr}`;
+	return `https://m.weibo.cn/status/${idstr}`;
+}
+
+export function buildWeiboUserUrl(uid: string): string {
+	return `https://weibo.com/u/${uid}`;
+}
+
 export function getPlatformName(platform: Platform | 'unknown'): string {
 	const names: Record<string, string> = {
 		zhihu: '知乎',
@@ -203,6 +278,7 @@ export function getPlatformName(platform: Platform | 'unknown'): string {
 		x: 'X (Twitter)',
 		xhs: '小红书',
 		bili: 'Bilibili (哔哩哔哩)',
+		weibo: '微博',
 		unknown: '未知',
 	};
 	return names[platform] ?? platform;

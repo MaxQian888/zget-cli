@@ -237,6 +237,30 @@ export function buildCliHelpText(): string {
     $ ${cliName} bili triple <bvid>           Triple-click (like+coin+fav)
     $ ${cliName} bili <url>                   Download video content as Markdown
 
+  Weibo (微博) Commands
+    $ ${cliName} weibo login                  Login via QR code/cookie
+    $ ${cliName} weibo whoami                 Show current user
+    $ ${cliName} weibo logout                 Clear saved cookies
+    $ ${cliName} weibo hot                    Show hot search topics
+    $ ${cliName} weibo search <query>         Search statuses
+    $ ${cliName} weibo feed [for-you|following]  Show timeline
+    $ ${cliName} weibo read <id|mblogid>      Show single status
+    $ ${cliName} weibo comments <id>          Show comments on a status
+    $ ${cliName} weibo user <uid|name>        Show user profile
+    $ ${cliName} weibo posts <uid>            Show user's recent posts
+    $ ${cliName} weibo favorites              Show your saved favorites
+    $ ${cliName} weibo followers <uid>        Show user's followers
+    $ ${cliName} weibo following <uid>        Show user's followings
+    $ ${cliName} weibo like <id>              Like a status
+    $ ${cliName} weibo unlike <id>            Unlike a status
+    $ ${cliName} weibo repost <id> [-t "<text>"]  Repost a status
+    $ ${cliName} weibo comment <id> -t "<text>"   Comment on a status
+    $ ${cliName} weibo delete <mid>           Delete your status
+    $ ${cliName} weibo follow <uid>           Follow user
+    $ ${cliName} weibo unfollow <uid>         Unfollow user
+    $ ${cliName} weibo post "<text>" [--image photo.jpg]   Publish a status (≤9 images)
+    $ ${cliName} weibo <url>                  Download status as Markdown
+
   AI Summary
     $ ${cliName} summary <url>                Summarize content from any URL
 
@@ -275,5 +299,6 @@ export function buildCliHelpText(): string {
     - X (Twitter):        x.com, twitter.com
     - XHS (小红书):        xiaohongshu.com, xhslink.com
     - Bilibili (哔哩哔哩):  bilibili.com, b23.tv
+    - Weibo (微博):        weibo.com, m.weibo.cn, s.weibo.com
 `;
 }

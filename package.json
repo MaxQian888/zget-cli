@@ -64,20 +64,20 @@
 	"dependencies": {
 		"@inkjs/ui": "^2.0.0",
 		"cheerio": "^1.2.0",
-		"dotenv": "^16.4.7",
+		"dotenv": "^16.6.1",
 		"ink": "^6.8.0",
 		"meow": "^11.0.0",
-		"playwright": "^1.52.0",
+		"playwright": "^1.60.0",
 		"qrcode": "^1.5.4",
-		"react": "^19.2.4",
+		"react": "^19.2.6",
 		"sanitize-filename": "^1.6.4",
-		"turndown": "^7.2.2",
-		"undici": "^7.24.6"
+		"turndown": "^7.2.4",
+		"undici": "^7.25.0"
 	},
 	"devDependencies": {
 		"@sindresorhus/tsconfig": "^3.0.1",
 		"@types/ink-testing-library": "1.0.4",
-		"@types/node": "^20.19.37",
+		"@types/node": "^20.19.41",
 		"@types/react": "^19.2.14",
 		"@types/sanitize-filename": "^1.6.3",
 		"@types/turndown": "^5.0.6",
@@ -167,6 +167,56 @@
 					"@typescript-eslint/no-extraneous-class": "off",
 					"@typescript-eslint/promise-function-async": "off",
 					"no-constructor-return": "off"
+				}
+			},
+			{
+				"files": [
+					"source/core/api/weibo-api.ts",
+					"source/core/api/weibo-image-upload.ts",
+					"source/core/auth/weibo-auth.ts",
+					"source/core/parser/platforms/weibo-parser.ts",
+					"source/types/weibo.ts"
+				],
+				"rules": {
+					"@typescript-eslint/naming-convention": "off",
+					"@typescript-eslint/restrict-template-expressions": "off",
+					"complexity": "off",
+					"no-await-in-loop": "off",
+					"unicorn/better-regex": "off",
+					"unicorn/explicit-length-check": "off",
+					"@typescript-eslint/no-implicit-any-catch": "off",
+					"@typescript-eslint/consistent-type-assertions": "off",
+					"@typescript-eslint/no-unnecessary-type-assertion": "off",
+					"@typescript-eslint/no-unsafe-assignment": "off",
+					"@typescript-eslint/prefer-nullish-coalescing": "off",
+					"prefer-destructuring": "off"
+				}
+			},
+			{
+				"files": [
+					"source/commands/weibo-*.tsx"
+				],
+				"rules": {
+					"@typescript-eslint/naming-convention": "off",
+					"unicorn/prefer-default-parameters": "off"
+				}
+			},
+			{
+				"files": [
+					"source/core/utils/url-parser.ts"
+				],
+				"rules": {
+					"complexity": "off",
+					"unicorn/better-regex": "off"
+				}
+			},
+			{
+				"files": [
+					"source/core/downloader/platforms/weibo-downloader.ts"
+				],
+				"rules": {
+					"@typescript-eslint/naming-convention": "off",
+					"@typescript-eslint/prefer-nullish-coalescing": "off"
 				}
 			}
 		],

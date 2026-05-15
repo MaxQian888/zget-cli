@@ -7,6 +7,8 @@ import {
 	buildColumnUrl,
 	buildUserUrl,
 	buildVideoUrl,
+	buildWeiboStatusUrl,
+	buildWeiboUserUrl,
 	getPlatformName,
 	parseUrl,
 	parseZhihuUrl,
@@ -110,6 +112,46 @@ describe('parseUrl', () => {
 			type: 'user',
 			mid: '2233',
 		});
+		// Weibo (微博)
+		expect(parseUrl('https://m.weibo.cn/status/Pxx88kAbC')).toEqual({
+			platform: 'weibo',
+			type: 'status',
+			idstr: 'Pxx88kAbC',
+		});
+		expect(parseUrl('https://m.weibo.cn/detail/5145xxxxxxxxxxx')).toEqual({
+			platform: 'weibo',
+			type: 'status',
+			idstr: '5145xxxxxxxxxxx',
+		});
+		expect(
+			parseUrl('https://weibo.com/1234567890/Pxx88kAbCdefg?type=comment'),
+		).toEqual({
+			platform: 'weibo',
+			type: 'status',
+			idstr: 'Pxx88kAbCdefg',
+			uid: '1234567890',
+			isMblogId: true,
+		});
+		expect(parseUrl('https://weibo.com/u/1669879400')).toEqual({
+			platform: 'weibo',
+			type: 'user',
+			uid: '1669879400',
+		});
+		expect(parseUrl('https://m.weibo.cn/u/1669879400')).toEqual({
+			platform: 'weibo',
+			type: 'user',
+			uid: '1669879400',
+		});
+		expect(parseUrl('https://m.weibo.cn/profile/1669879400')).toEqual({
+			platform: 'weibo',
+			type: 'user',
+			uid: '1669879400',
+		});
+		expect(parseUrl('https://weibo.com/n/Astro%E5%9D%87')).toEqual({
+			platform: 'weibo',
+			type: 'user',
+			screenName: 'Astro均',
+		});
 	});
 
 	it('falls back to unknown for unsupported inputs', () => {
@@ -139,12 +181,22 @@ describe('url helpers', () => {
 			'https://www.bilibili.com/video/BV1ab411c7mD',
 		);
 		expect(buildBiliUserUrl('12345')).toBe('https://space.bilibili.com/12345');
+		expect(buildWeiboStatusUrl('Pxx88kAbC', '1234567890')).toBe(
+			'https://weibo.com/1234567890/Pxx88kAbC',
+		);
+		expect(buildWeiboStatusUrl('Pxx88kAbC')).toBe(
+			'https://m.weibo.cn/status/Pxx88kAbC',
+		);
+		expect(buildWeiboUserUrl('1234567890')).toBe(
+			'https://weibo.com/u/1234567890',
+		);
 	});
 
 	it('returns localized platform names', () => {
 		expect(getPlatformName('zhihu')).toBe('知乎');
 		expect(getPlatformName('x')).toBe('X (Twitter)');
 		expect(getPlatformName('bili')).toBe('Bilibili (哔哩哔哩)');
+		expect(getPlatformName('weibo')).toBe('微博');
 		expect(getPlatformName('unknown')).toBe('未知');
 	});
 });

@@ -65,3 +65,30 @@ export function getBiliHeaders(cookies?: string): Record<string, string> {
 
 	return headers;
 }
+
+export function getWeiboHeaders(
+	cookies?: string,
+	csrfToken?: string,
+): Record<string, string> {
+	const headers: Record<string, string> = {
+		[userAgentHeader]: defaultUserAgent,
+		[acceptHeader]: 'application/json, text/plain, */*',
+		[acceptLanguageHeader]: 'zh-CN,zh;q=0.9,en;q=0.8',
+		[refererHeader]: 'https://weibo.com/',
+		'X-Requested-With': 'XMLHttpRequest',
+		'client-version': 'v2.47.42',
+		'sec-ch-ua': `"Not:A-Brand";v="99", "Google Chrome";v="${chromeVersion}", "Chromium";v="${chromeVersion}"`,
+		'sec-ch-ua-mobile': '?0',
+		'sec-ch-ua-platform': '"Windows"',
+	};
+
+	if (cookies) {
+		headers[cookieHeader] = cookies;
+	}
+
+	if (csrfToken) {
+		headers['X-XSRF-TOKEN'] = csrfToken;
+	}
+
+	return headers;
+}

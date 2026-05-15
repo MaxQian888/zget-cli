@@ -506,7 +506,7 @@ describe('resolveCommand', () => {
 			'Error: Could not detect content type from: not-a-supported-url',
 		);
 		expect(stderrWrites.join('')).toContain(
-			'Supported: zhihu, csdn, weixin, juejin, x.com, xiaohongshu.com, bilibili.com URLs or use a subcommand',
+			'Supported: zhihu, csdn, weixin, juejin, x.com, xiaohongshu.com, bilibili.com, weibo.com URLs or use a subcommand',
 		);
 	});
 });

@@ -3,6 +3,7 @@ import {rm} from 'node:fs/promises';
 import {CookieStore} from '../auth/cookie-store';
 import {XhsCookieStore} from '../auth/xhs-auth';
 import {BiliCookieStore} from '../auth/bili-auth';
+import {WeiboCookieStore} from '../auth/weibo-auth';
 import {aiConfigFile, xCredentialsFile, xhsTokenFile} from '../utils/config';
 import {getPlatformAccountState} from './account-status';
 import type {
@@ -52,6 +53,10 @@ function getLoginCommand(platform: AccountPlatform): string {
 			return 'zget bili login';
 		}
 
+		case 'weibo': {
+			return 'zget weibo login';
+		}
+
 		case 'ai': {
 			return 'Configure ~/.zget-cli/ai-config.json or set AI_* environment variables';
 		}
@@ -92,6 +97,13 @@ async function clearXhs(): Promise<void> {
 
 async function clearBili(): Promise<void> {
 	const store = new BiliCookieStore();
+	await store.load();
+	store.clear();
+	await store.save();
+}
+
+async function clearWeibo(): Promise<void> {
+	const store = new WeiboCookieStore();
 	await store.load();
 	store.clear();
 	await store.save();
@@ -141,6 +153,11 @@ export async function runPlatformAction(
 		case 'bili': {
 			await clearBili();
 			return refresh(platform, action, 'Cleared saved Bilibili cookies.');
+		}
+
+		case 'weibo': {
+			await clearWeibo();
+			return refresh(platform, action, 'Cleared saved Weibo cookies.');
 		}
 
 		case 'ai': {

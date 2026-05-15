@@ -17,6 +17,9 @@ export const xhsTokenFile = join(configDir, 'xhs-tokens.json');
 // Bilibili
 export const biliCookieFile = join(configDir, 'bili-cookies.json');
 
+// Weibo (微博)
+export const weiboCookieFile = join(configDir, 'weibo-cookies.json');
+
 // AI
 export const aiConfigFile = join(configDir, 'ai-config.json');
 

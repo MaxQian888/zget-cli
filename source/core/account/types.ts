@@ -1,4 +1,4 @@
-export type AccountPlatform = 'zhihu' | 'x' | 'xhs' | 'bili' | 'ai';
+export type AccountPlatform = 'zhihu' | 'x' | 'xhs' | 'bili' | 'weibo' | 'ai';
 
 export type AccountStatus = 'missing' | 'detected' | 'ready' | 'error';
 

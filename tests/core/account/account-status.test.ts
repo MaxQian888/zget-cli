@@ -5,6 +5,7 @@ const {
 	probeTwitterLocalStateMock,
 	probeXhsLocalStateMock,
 	probeBiliLocalStateMock,
+	probeWeiboLocalStateMock,
 	probeAiLocalStateMock,
 	xCredentialStoreLoadMock,
 	xApiGetMyUserMock,
@@ -13,6 +14,7 @@ const {
 	probeTwitterLocalStateMock: vi.fn(),
 	probeXhsLocalStateMock: vi.fn(),
 	probeBiliLocalStateMock: vi.fn(),
+	probeWeiboLocalStateMock: vi.fn(),
 	probeAiLocalStateMock: vi.fn(),
 	xCredentialStoreLoadMock: vi.fn(),
 	xApiGetMyUserMock: vi.fn(),
@@ -23,6 +25,7 @@ vi.mock('../../../source/core/account/platform-probes', () => ({
 	probeTwitterLocalState: probeTwitterLocalStateMock,
 	probeXhsLocalState: probeXhsLocalStateMock,
 	probeBiliLocalState: probeBiliLocalStateMock,
+	probeWeiboLocalState: probeWeiboLocalStateMock,
 	probeAiLocalState: probeAiLocalStateMock,
 }));
 
@@ -62,6 +65,11 @@ describe('account status snapshots', () => {
 		});
 		probeBiliLocalStateMock.mockReset().mockResolvedValue({
 			platform: 'bili',
+			status: 'missing',
+			credentialSource: 'none',
+		});
+		probeWeiboLocalStateMock.mockReset().mockResolvedValue({
+			platform: 'weibo',
 			status: 'missing',
 			credentialSource: 'none',
 		});

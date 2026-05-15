@@ -26,6 +26,14 @@ function getRefererForImage(imageUrl: string): string {
 		return 'https://juejin.cn/';
 	}
 
+	if (
+		imageUrl.includes('sinaimg.cn') ||
+		imageUrl.includes('weibo.com') ||
+		imageUrl.includes('weibocdn.com')
+	) {
+		return 'https://weibo.com/';
+	}
+
 	return '';
 }
 

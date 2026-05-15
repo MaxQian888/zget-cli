@@ -120,6 +120,30 @@ Usage
     $ zget bili triple <bvid>           Triple-click (like+coin+fav)
     $ zget bili <url>                   Download video content as Markdown
 
+  Weibo (微博) Commands
+    $ zget weibo login                  Login via QR code/cookie
+    $ zget weibo whoami                 Show current user
+    $ zget weibo logout                 Clear saved cookies
+    $ zget weibo hot                    Show hot search topics
+    $ zget weibo search <query>         Search statuses
+    $ zget weibo feed [for-you|following]  Show timeline
+    $ zget weibo read <id|mblogid>      Show single status
+    $ zget weibo comments <id>          Show comments on a status
+    $ zget weibo user <uid|name>        Show user profile
+    $ zget weibo posts <uid>            Show user's recent posts
+    $ zget weibo favorites              Show your saved favorites
+    $ zget weibo followers <uid>        Show user's followers
+    $ zget weibo following <uid>        Show user's followings
+    $ zget weibo like <id>              Like a status
+    $ zget weibo unlike <id>            Unlike a status
+    $ zget weibo repost <id> [-t "<text>"]  Repost a status
+    $ zget weibo comment <id> -t "<text>"   Comment on a status
+    $ zget weibo delete <mid>           Delete your status
+    $ zget weibo follow <uid>           Follow user
+    $ zget weibo unfollow <uid>         Unfollow user
+    $ zget weibo post "<text>" [--image photo.jpg]   Publish a status (≤9 images)
+    $ zget weibo <url>                  Download status as Markdown
+
   AI Summary
     $ zget summary <url>                Summarize content from any URL
 
@@ -158,6 +182,7 @@ Usage
     - X (Twitter):        x.com, twitter.com
     - XHS (小红书):        xiaohongshu.com, xhslink.com
     - Bilibili (哔哩哔哩):  bilibili.com, b23.tv
+    - Weibo (微博):        weibo.com, m.weibo.cn, s.weibo.com
 ```
 
 ## Options

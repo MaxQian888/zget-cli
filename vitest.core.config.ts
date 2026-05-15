@@ -13,6 +13,7 @@ export default defineConfig({
 				'source/core/ai/**/*.ts',
 				'source/core/auth/bili-auth.ts',
 				'source/core/auth/cookie-store.ts',
+				'source/core/auth/weibo-auth.ts',
 				'source/core/auth/x-auth.ts',
 				'source/core/auth/xhs-auth.ts',
 				'source/core/api/client.ts',

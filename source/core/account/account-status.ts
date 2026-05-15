@@ -3,15 +3,18 @@ import {ZhihuApi} from '../api/zhihu-api';
 import {XApi} from '../api/x-api';
 import {XhsApi} from '../api/xhs-api';
 import {BiliApi} from '../api/bili-api';
+import {WeiboApi} from '../api/weibo-api';
 import {AiConfigStore} from '../ai/ai-config';
 import {CookieStore} from '../auth/cookie-store';
 import {XCredentialStore} from '../auth/x-auth';
 import {XhsCookieStore} from '../auth/xhs-auth';
 import {BiliCookieStore} from '../auth/bili-auth';
+import {WeiboCookieStore} from '../auth/weibo-auth';
 import {
 	probeAiLocalState,
 	probeBiliLocalState,
 	probeTwitterLocalState,
+	probeWeiboLocalState,
 	probeXhsLocalState,
 	probeZhihuLocalState,
 } from './platform-probes';
@@ -21,7 +24,14 @@ import type {
 	LocalAccountState,
 } from './types';
 
-const orderedPlatforms: AccountPlatform[] = ['zhihu', 'x', 'xhs', 'bili', 'ai'];
+const orderedPlatforms: AccountPlatform[] = [
+	'zhihu',
+	'x',
+	'xhs',
+	'bili',
+	'weibo',
+	'ai',
+];
 
 function assertNever(value: never): never {
 	throw new Error(`Unsupported platform: ${String(value)}`);
@@ -137,6 +147,23 @@ async function validateBili(
 	});
 }
 
+async function validateWeibo(
+	state: LocalAccountState,
+): Promise<AccountStateSnapshot> {
+	const cookieStore = new WeiboCookieStore();
+	await cookieStore.load();
+	const api = new WeiboApi(cookieStore);
+	const profile = await api.getMyProfile();
+
+	return markValidated(state, {
+		status: 'ready',
+		identity: {
+			id: profile.idstr ?? String(profile.id),
+			displayName: profile.screen_name,
+		},
+	});
+}
+
 async function validateAi(
 	state: LocalAccountState,
 ): Promise<AccountStateSnapshot> {
@@ -180,6 +207,10 @@ async function resolveLocalState(
 			return probeBiliLocalState();
 		}
 
+		case 'weibo': {
+			return probeWeiboLocalState();
+		}
+
 		case 'ai': {
 			return probeAiLocalState();
 		}
@@ -214,6 +245,10 @@ export async function getPlatformAccountState(
 
 			case 'bili': {
 				return await validateBili(localState);
+			}
+
+			case 'weibo': {
+				return await validateWeibo(localState);
 			}
 
 			case 'ai': {

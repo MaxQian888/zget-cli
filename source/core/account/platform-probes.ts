@@ -3,6 +3,7 @@ import {CookieStore} from '../auth/cookie-store';
 import {XCredentialStore} from '../auth/x-auth';
 import {XhsCookieStore} from '../auth/xhs-auth';
 import {BiliCookieStore} from '../auth/bili-auth';
+import {WeiboCookieStore} from '../auth/weibo-auth';
 import {AiConfigStore} from '../ai/ai-config';
 import type {LocalAccountState} from './types';
 
@@ -74,6 +75,18 @@ export async function probeBiliLocalState(): Promise<LocalAccountState> {
 
 	return {
 		platform: 'bili',
+		status: isAuthenticated ? 'detected' : 'missing',
+		credentialSource: isAuthenticated ? 'cookies' : 'none',
+	};
+}
+
+export async function probeWeiboLocalState(): Promise<LocalAccountState> {
+	const store = new WeiboCookieStore();
+	await store.load();
+	const isAuthenticated = store.isAuthenticated();
+
+	return {
+		platform: 'weibo',
 		status: isAuthenticated ? 'detected' : 'missing',
 		credentialSource: isAuthenticated ? 'cookies' : 'none',
 	};

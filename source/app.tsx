@@ -25,6 +25,11 @@ import BiliBrowseCommand from './commands/bili-browse';
 import BiliInteractCommand from './commands/bili-interact';
 import BiliDownloadCommand from './commands/bili-download';
 import BiliLoginCommand from './commands/bili-login';
+import WeiboLoginCommand from './commands/weibo-login';
+import WeiboBrowseCommand from './commands/weibo-browse';
+import WeiboInteractCommand from './commands/weibo-interact';
+import WeiboPublishCommand from './commands/weibo-publish';
+import WeiboDownloadCommand from './commands/weibo-download';
 import SummaryCommand from './commands/summary';
 import UiHomeCommand from './commands/ui-home';
 import UiAccountCenterCommand from './commands/ui-account-center';
@@ -293,6 +298,72 @@ export default function App({resolved}: Props) {
 		case 'bili-whoami':
 		case 'bili-logout': {
 			return <BiliLoginCommand mode={command} flags={flags} format={format} />;
+		}
+
+		// --- Weibo auth ---
+		case 'weibo-login':
+		case 'weibo-whoami':
+		case 'weibo-logout': {
+			return <WeiboLoginCommand mode={command} flags={flags} format={format} />;
+		}
+
+		// --- Weibo browse ---
+		case 'weibo-hot':
+		case 'weibo-search':
+		case 'weibo-feed':
+		case 'weibo-read':
+		case 'weibo-comments':
+		case 'weibo-user':
+		case 'weibo-posts':
+		case 'weibo-favorites':
+		case 'weibo-followers':
+		case 'weibo-following': {
+			return (
+				<WeiboBrowseCommand
+					browseType={command}
+					query={url ?? ''}
+					flags={flags}
+					limit={limit}
+					format={format}
+					extraArgs={extraArgs}
+				/>
+			);
+		}
+
+		// --- Weibo interact ---
+		case 'weibo-like':
+		case 'weibo-unlike':
+		case 'weibo-repost':
+		case 'weibo-comment':
+		case 'weibo-delete':
+		case 'weibo-follow':
+		case 'weibo-unfollow': {
+			return (
+				<WeiboInteractCommand
+					interactType={command}
+					target={url ?? ''}
+					text={text}
+					flags={flags}
+					format={format}
+				/>
+			);
+		}
+
+		// --- Weibo publish ---
+		case 'weibo-post': {
+			return (
+				<WeiboPublishCommand
+					text={text ?? content ?? ''}
+					images={images}
+					flags={flags}
+					format={format}
+				/>
+			);
+		}
+
+		// --- Weibo download ---
+		case 'weibo-download': {
+			return <WeiboDownloadCommand idstr={url!} flags={flags} />;
 		}
 
 		// --- Zhihu Account ---
