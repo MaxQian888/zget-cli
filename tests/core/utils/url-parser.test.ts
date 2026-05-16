@@ -154,6 +154,98 @@ describe('parseUrl', () => {
 		});
 	});
 
+	it('parses Hacker News URLs (item / user)', () => {
+		expect(parseUrl('https://news.ycombinator.com/item?id=12345')).toEqual({
+			platform: 'hn',
+			type: 'item',
+			id: '12345',
+		});
+		expect(parseUrl('https://news.ycombinator.com/user?id=pg')).toEqual({
+			platform: 'hn',
+			type: 'user',
+			username: 'pg',
+		});
+	});
+
+	it('parses Reddit URLs (post / subreddit / user)', () => {
+		expect(
+			parseUrl('https://reddit.com/r/programming/comments/abc123/hello-world'),
+		).toEqual({
+			platform: 'reddit',
+			type: 'post',
+			subreddit: 'programming',
+			postId: 'abc123',
+			slug: 'hello-world',
+		});
+		expect(parseUrl('https://reddit.com/r/programming')).toEqual({
+			platform: 'reddit',
+			type: 'subreddit',
+			subreddit: 'programming',
+		});
+		expect(parseUrl('https://reddit.com/user/spez')).toEqual({
+			platform: 'reddit',
+			type: 'user',
+			username: 'spez',
+		});
+	});
+
+	it('parses V2EX URLs (topic / member / node)', () => {
+		expect(parseUrl('https://v2ex.com/t/1234567')).toEqual({
+			platform: 'v2ex',
+			type: 'topic',
+			topicId: '1234567',
+		});
+		expect(parseUrl('https://v2ex.com/member/livid')).toEqual({
+			platform: 'v2ex',
+			type: 'member',
+			username: 'livid',
+		});
+		expect(parseUrl('https://v2ex.com/go/programmer')).toEqual({
+			platform: 'v2ex',
+			type: 'node',
+			nodeName: 'programmer',
+		});
+	});
+
+	it('parses Douban URLs (movie / book / group / people)', () => {
+		expect(parseUrl('https://movie.douban.com/subject/1292052/')).toEqual({
+			platform: 'douban',
+			type: 'movie',
+			subjectId: '1292052',
+		});
+		expect(parseUrl('https://book.douban.com/subject/1084336/')).toEqual({
+			platform: 'douban',
+			type: 'book',
+			subjectId: '1084336',
+		});
+		expect(parseUrl('https://www.douban.com/group/topic/9999999/')).toEqual({
+			platform: 'douban',
+			type: 'group-topic',
+			topicId: '9999999',
+		});
+		expect(parseUrl('https://www.douban.com/people/abc/')).toEqual({
+			platform: 'douban',
+			type: 'people',
+			userId: 'abc',
+		});
+	});
+
+	it('parses Bluesky URLs (post / profile)', () => {
+		expect(
+			parseUrl('https://bsky.app/profile/alice.bsky.social/post/3kabc'),
+		).toEqual({
+			platform: 'bsky',
+			type: 'post',
+			handle: 'alice.bsky.social',
+			rkey: '3kabc',
+		});
+		expect(parseUrl('https://bsky.app/profile/alice.bsky.social')).toEqual({
+			platform: 'bsky',
+			type: 'profile',
+			handle: 'alice.bsky.social',
+		});
+	});
+
 	it('falls back to unknown for unsupported inputs', () => {
 		expect(parseUrl('https://example.com/post/1')).toEqual({
 			platform: 'unknown',

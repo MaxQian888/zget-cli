@@ -30,6 +30,21 @@ import WeiboBrowseCommand from './commands/weibo-browse';
 import WeiboInteractCommand from './commands/weibo-interact';
 import WeiboPublishCommand from './commands/weibo-publish';
 import WeiboDownloadCommand from './commands/weibo-download';
+import HnLoginCommand from './commands/hn-login';
+import HnBrowseCommand from './commands/hn-browse';
+import HnInteractCommand from './commands/hn-interact';
+import HnPublishCommand from './commands/hn-publish';
+import HnDownloadCommand from './commands/hn-download';
+import V2exLoginCommand from './commands/v2ex-login';
+import V2exBrowseCommand from './commands/v2ex-browse';
+import V2exInteractCommand from './commands/v2ex-interact';
+import V2exPublishCommand from './commands/v2ex-publish';
+import V2exDownloadCommand from './commands/v2ex-download';
+import RedditLoginCommand from './commands/reddit-login';
+import RedditBrowseCommand from './commands/reddit-browse';
+import RedditInteractCommand from './commands/reddit-interact';
+import RedditPublishCommand from './commands/reddit-publish';
+import RedditDownloadCommand from './commands/reddit-download';
 import SummaryCommand from './commands/summary';
 import UiHomeCommand from './commands/ui-home';
 import UiAccountCenterCommand from './commands/ui-account-center';
@@ -364,6 +379,230 @@ export default function App({resolved}: Props) {
 		// --- Weibo download ---
 		case 'weibo-download': {
 			return <WeiboDownloadCommand idstr={url!} flags={flags} />;
+		}
+
+		// --- HN auth ---
+		case 'hn-login':
+		case 'hn-whoami':
+		case 'hn-logout': {
+			return <HnLoginCommand mode={command} flags={flags} format={format} />;
+		}
+
+		// --- HN browse ---
+		case 'hn-top':
+		case 'hn-best':
+		case 'hn-new':
+		case 'hn-ask':
+		case 'hn-show':
+		case 'hn-jobs':
+		case 'hn-search':
+		case 'hn-item':
+		case 'hn-user':
+		case 'hn-user-submitted':
+		case 'hn-comments': {
+			return (
+				<HnBrowseCommand
+					browseType={command}
+					query={url ?? ''}
+					flags={flags}
+					limit={limit}
+					format={format}
+					extraArgs={extraArgs}
+				/>
+			);
+		}
+
+		// --- HN interact ---
+		case 'hn-upvote':
+		case 'hn-unvote':
+		case 'hn-favorite':
+		case 'hn-unfavorite':
+		case 'hn-comment':
+		case 'hn-delete': {
+			return (
+				<HnInteractCommand
+					interactType={command}
+					target={url ?? ''}
+					text={text}
+					isConfirmed={yes}
+					flags={flags}
+					format={format}
+				/>
+			);
+		}
+
+		// --- HN publish ---
+		case 'hn-submit': {
+			return (
+				<HnPublishCommand
+					text={text ?? ''}
+					content={content}
+					flags={flags}
+					format={format}
+				/>
+			);
+		}
+
+		// --- HN download ---
+		case 'hn-download': {
+			return <HnDownloadCommand itemId={url!} flags={flags} />;
+		}
+
+		// --- V2EX auth ---
+		case 'v2ex-login':
+		case 'v2ex-whoami':
+		case 'v2ex-logout': {
+			return (
+				<V2exLoginCommand
+					mode={command}
+					flags={flags}
+					cookie={cookie}
+					format={format}
+				/>
+			);
+		}
+
+		// --- V2EX browse ---
+		case 'v2ex-hot':
+		case 'v2ex-latest':
+		case 'v2ex-node':
+		case 'v2ex-topics':
+		case 'v2ex-topic':
+		case 'v2ex-replies':
+		case 'v2ex-member':
+		case 'v2ex-notifications':
+		case 'v2ex-my-topics':
+		case 'v2ex-my-following': {
+			return (
+				<V2exBrowseCommand
+					browseType={command}
+					query={url ?? ''}
+					flags={flags}
+					limit={limit}
+					format={format}
+				/>
+			);
+		}
+
+		// --- V2EX interact ---
+		case 'v2ex-collect':
+		case 'v2ex-uncollect':
+		case 'v2ex-thank-topic':
+		case 'v2ex-thank-reply':
+		case 'v2ex-reply':
+		case 'v2ex-delete-reply': {
+			return (
+				<V2exInteractCommand
+					interactType={command}
+					target={url ?? ''}
+					text={text}
+					isConfirmed={yes}
+					flags={flags}
+					format={format}
+				/>
+			);
+		}
+
+		// --- V2EX publish ---
+		case 'v2ex-new-topic': {
+			return (
+				<V2exPublishCommand
+					node={url ?? ''}
+					text={text ?? ''}
+					content={content}
+					flags={flags}
+					format={format}
+				/>
+			);
+		}
+
+		// --- V2EX download ---
+		case 'v2ex-download': {
+			return <V2exDownloadCommand topicId={url!} flags={flags} />;
+		}
+
+		// --- Reddit auth ---
+		case 'reddit-login':
+		case 'reddit-whoami':
+		case 'reddit-logout': {
+			return (
+				<RedditLoginCommand
+					mode={command}
+					flags={flags}
+					cookie={cookie}
+					format={format}
+				/>
+			);
+		}
+
+		// --- Reddit browse ---
+		case 'reddit-search':
+		case 'reddit-subreddit':
+		case 'reddit-hot':
+		case 'reddit-top':
+		case 'reddit-new':
+		case 'reddit-read':
+		case 'reddit-comments':
+		case 'reddit-user':
+		case 'reddit-user-posts':
+		case 'reddit-user-comments':
+		case 'reddit-saved':
+		case 'reddit-subscribed': {
+			return (
+				<RedditBrowseCommand
+					browseType={command}
+					query={url ?? ''}
+					flags={flags}
+					limit={limit}
+					format={format}
+				/>
+			);
+		}
+
+		// --- Reddit interact ---
+		case 'reddit-upvote':
+		case 'reddit-downvote':
+		case 'reddit-unvote':
+		case 'reddit-save':
+		case 'reddit-unsave':
+		case 'reddit-subscribe':
+		case 'reddit-unsubscribe':
+		case 'reddit-comment':
+		case 'reddit-delete': {
+			return (
+				<RedditInteractCommand
+					interactType={command}
+					target={url ?? ''}
+					text={text}
+					isConfirmed={yes}
+					flags={flags}
+					format={format}
+				/>
+			);
+		}
+
+		// --- Reddit publish ---
+		case 'reddit-submit': {
+			return (
+				<RedditPublishCommand
+					subreddit={url ?? ''}
+					text={text ?? ''}
+					content={content}
+					flags={flags}
+					format={format}
+				/>
+			);
+		}
+
+		// --- Reddit download ---
+		case 'reddit-download': {
+			return (
+				<RedditDownloadCommand
+					postId={url!}
+					subreddit={extraArgs?.[0]}
+					flags={flags}
+				/>
+			);
 		}
 
 		// --- Zhihu Account ---

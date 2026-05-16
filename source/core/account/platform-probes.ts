@@ -4,6 +4,9 @@ import {XCredentialStore} from '../auth/x-auth';
 import {XhsCookieStore} from '../auth/xhs-auth';
 import {BiliCookieStore} from '../auth/bili-auth';
 import {WeiboCookieStore} from '../auth/weibo-auth';
+import {HnCookieStore} from '../auth/hn-auth';
+import {V2exTokenStore} from '../auth/v2ex-auth';
+import {RedditCredentialStore} from '../auth/reddit-auth';
 import {AiConfigStore} from '../ai/ai-config';
 import type {LocalAccountState} from './types';
 
@@ -109,4 +112,50 @@ export async function probeAiLocalState(): Promise<LocalAccountState> {
 		status: 'detected',
 		credentialSource: hasAiEnvCredentials() ? 'env' : 'file',
 	};
+}
+
+// Placeholder probes — replaced by real implementations when each platform's
+// auth module lands. Each returns 'missing' so the account center treats the
+// platform as available-to-add without trying to validate.
+
+export async function probeRedditLocalState(): Promise<LocalAccountState> {
+	const store = new RedditCredentialStore();
+	await store.load();
+	const isAuthenticated = store.isAuthenticated();
+	return {
+		platform: 'reddit',
+		status: isAuthenticated ? 'detected' : 'missing',
+		credentialSource: isAuthenticated ? 'file' : 'none',
+	};
+}
+
+export async function probeHnLocalState(): Promise<LocalAccountState> {
+	const store = new HnCookieStore();
+	await store.load();
+	const isAuthenticated = store.isAuthenticated();
+
+	return {
+		platform: 'hn',
+		status: isAuthenticated ? 'detected' : 'missing',
+		credentialSource: isAuthenticated ? 'cookies' : 'none',
+	};
+}
+
+export async function probeV2exLocalState(): Promise<LocalAccountState> {
+	const store = new V2exTokenStore();
+	await store.load();
+	const isAuthenticated = store.isAuthenticated();
+	return {
+		platform: 'v2ex',
+		status: isAuthenticated ? 'detected' : 'missing',
+		credentialSource: isAuthenticated ? 'file' : 'none',
+	};
+}
+
+export async function probeDoubanLocalState(): Promise<LocalAccountState> {
+	return {platform: 'douban', status: 'missing', credentialSource: 'none'};
+}
+
+export async function probeBskyLocalState(): Promise<LocalAccountState> {
+	return {platform: 'bsky', status: 'missing', credentialSource: 'none'};
 }

@@ -261,6 +261,76 @@ export function buildCliHelpText(): string {
     $ ${cliName} weibo post "<text>" [--image photo.jpg]   Publish a status (≤9 images)
     $ ${cliName} weibo <url>                  Download status as Markdown
 
+  Hacker News Commands
+    $ ${cliName} hn login                     Login via browser cookie capture
+    $ ${cliName} hn whoami                    Show current user
+    $ ${cliName} hn logout                    Clear saved cookies
+    $ ${cliName} hn top|best|new|ask|show|jobs   Front pages (--limit N)
+    $ ${cliName} hn search <query>            Algolia search (--limit N)
+    $ ${cliName} hn item <id>                 Read a story / comment
+    $ ${cliName} hn user <name>               Show a user profile
+    $ ${cliName} hn user-submitted <name>     List a user's recent submissions
+    $ ${cliName} hn comments <id>             Print a story's comment tree
+    $ ${cliName} hn upvote <id>               Upvote a story or comment
+    $ ${cliName} hn unvote <id>               Cancel an upvote
+    $ ${cliName} hn favorite <id>             Favorite an item
+    $ ${cliName} hn unfavorite <id>           Unfavorite an item
+    $ ${cliName} hn comment <id> -t "<text>"  Reply to a story or comment
+    $ ${cliName} hn delete <id> --yes         Delete your story or comment
+    $ ${cliName} hn submit -t "<title>" --content <url|text>   Submit a story
+    $ ${cliName} hn download <id|url>         Save item + comments as Markdown
+
+  V2EX Commands
+    $ ${cliName} v2ex login --cookie <token>  Save Personal Access Token
+    $ ${cliName} v2ex whoami                  Show current user
+    $ ${cliName} v2ex logout                  Clear saved token
+    $ ${cliName} v2ex hot                     Show hot topics (--limit N)
+    $ ${cliName} v2ex latest                  Show latest topics (--limit N)
+    $ ${cliName} v2ex node <name>             Show a node's metadata
+    $ ${cliName} v2ex topics <name>           List a node's topics
+    $ ${cliName} v2ex topic <id>              Read a topic
+    $ ${cliName} v2ex replies <id>            List a topic's replies
+    $ ${cliName} v2ex member <name>           Show a member profile
+    $ ${cliName} v2ex notifications           Show your notifications
+    $ ${cliName} v2ex my-topics               Show your recent topics
+    $ ${cliName} v2ex my-following            Show topics you're following
+    $ ${cliName} v2ex collect <id>            Collect (bookmark) a topic
+    $ ${cliName} v2ex uncollect <id>          Remove a topic from collection
+    $ ${cliName} v2ex thank-topic <id>        Thank a topic
+    $ ${cliName} v2ex thank-reply <id>        Thank a reply
+    $ ${cliName} v2ex reply <id> -t "<text>"  Reply to a topic
+    $ ${cliName} v2ex delete-reply <id> --yes Delete one of your replies
+    $ ${cliName} v2ex new-topic <node> -t "<title>" --content "<body>"   Post a new topic
+    $ ${cliName} v2ex download <id|url>       Save topic + replies as Markdown
+
+  Reddit Commands
+    $ ${cliName} reddit login --cookie '{"clientId":"...","clientSecret":"...","username":"...","password":"..."}'  Save OAuth2 script-app credentials
+    $ ${cliName} reddit whoami                Show current user
+    $ ${cliName} reddit logout                Clear saved credentials
+    $ ${cliName} reddit hot [sub]             Front page hot (or r/<sub>)
+    $ ${cliName} reddit top [sub]             Top posts (or r/<sub>)
+    $ ${cliName} reddit new [sub]             Newest posts (or r/<sub>)
+    $ ${cliName} reddit search <query>        Search posts
+    $ ${cliName} reddit subreddit <name>      Show subreddit metadata
+    $ ${cliName} reddit read <postId>         Read a post
+    $ ${cliName} reddit comments <postId>     List a post's comment tree
+    $ ${cliName} reddit user <name>           Show a user profile
+    $ ${cliName} reddit user-posts <name>     List a user's submissions
+    $ ${cliName} reddit user-comments <name>  List a user's comments
+    $ ${cliName} reddit saved                 Your saved items
+    $ ${cliName} reddit subscribed            Subreddits you're subscribed to
+    $ ${cliName} reddit upvote <id>           Upvote a post or comment
+    $ ${cliName} reddit downvote <id>         Downvote
+    $ ${cliName} reddit unvote <id>           Cancel a vote
+    $ ${cliName} reddit save <id>             Save a post or comment
+    $ ${cliName} reddit unsave <id>           Unsave
+    $ ${cliName} reddit subscribe <sub>       Subscribe to a subreddit
+    $ ${cliName} reddit unsubscribe <sub>     Unsubscribe
+    $ ${cliName} reddit comment <id> -t "<text>"  Reply to a post or comment
+    $ ${cliName} reddit delete <id> --yes     Delete your post or comment
+    $ ${cliName} reddit submit <sub> -t "<title>" --content "<url-or-text>"  Submit a post
+    $ ${cliName} reddit download <id|url>     Save post + comments as Markdown
+
   AI Summary
     $ ${cliName} summary <url>                Summarize content from any URL
 
@@ -300,5 +370,8 @@ export function buildCliHelpText(): string {
     - XHS (小红书):        xiaohongshu.com, xhslink.com
     - Bilibili (哔哩哔哩):  bilibili.com, b23.tv
     - Weibo (微博):        weibo.com, m.weibo.cn, s.weibo.com
+    - Hacker News:        news.ycombinator.com
+    - V2EX:               v2ex.com
+    - Reddit:             reddit.com, redd.it
 `;
 }

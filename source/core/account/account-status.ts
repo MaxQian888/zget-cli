@@ -4,16 +4,27 @@ import {XApi} from '../api/x-api';
 import {XhsApi} from '../api/xhs-api';
 import {BiliApi} from '../api/bili-api';
 import {WeiboApi} from '../api/weibo-api';
+import {HnApi} from '../api/hn-api';
+import {V2exApi} from '../api/v2ex-api';
+import {RedditApi} from '../api/reddit-api';
 import {AiConfigStore} from '../ai/ai-config';
 import {CookieStore} from '../auth/cookie-store';
 import {XCredentialStore} from '../auth/x-auth';
 import {XhsCookieStore} from '../auth/xhs-auth';
 import {BiliCookieStore} from '../auth/bili-auth';
 import {WeiboCookieStore} from '../auth/weibo-auth';
+import {HnCookieStore} from '../auth/hn-auth';
+import {V2exTokenStore} from '../auth/v2ex-auth';
+import {RedditCredentialStore} from '../auth/reddit-auth';
 import {
 	probeAiLocalState,
 	probeBiliLocalState,
+	probeBskyLocalState,
+	probeDoubanLocalState,
+	probeHnLocalState,
+	probeRedditLocalState,
 	probeTwitterLocalState,
+	probeV2exLocalState,
 	probeWeiboLocalState,
 	probeXhsLocalState,
 	probeZhihuLocalState,
@@ -30,6 +41,11 @@ const orderedPlatforms: AccountPlatform[] = [
 	'xhs',
 	'bili',
 	'weibo',
+	'reddit',
+	'hn',
+	'v2ex',
+	'douban',
+	'bsky',
 	'ai',
 ];
 
@@ -164,6 +180,74 @@ async function validateWeibo(
 	});
 }
 
+// Placeholder validators — each platform's vertical-slice PR replaces these
+// with a real call to its API client. Until then they pass the local state
+// through unchanged so the account center renders.
+
+async function validateReddit(
+	state: LocalAccountState,
+): Promise<AccountStateSnapshot> {
+	const credStore = new RedditCredentialStore();
+	await credStore.load();
+	const api = new RedditApi(credStore);
+	const profile = await api.getMyProfile();
+
+	return markValidated(state, {
+		status: 'ready',
+		identity: {
+			id: profile.id,
+			displayName: profile.name,
+			handle: `u/${profile.name}`,
+		},
+	});
+}
+
+async function validateHn(
+	state: LocalAccountState,
+): Promise<AccountStateSnapshot> {
+	const cookieStore = new HnCookieStore();
+	await cookieStore.load();
+	const api = new HnApi(cookieStore);
+	const profile = await api.getMyProfile();
+
+	return markValidated(state, {
+		status: 'ready',
+		identity: {
+			id: profile.id,
+			displayName: profile.id,
+		},
+	});
+}
+
+async function validateV2ex(
+	state: LocalAccountState,
+): Promise<AccountStateSnapshot> {
+	const tokenStore = new V2exTokenStore();
+	await tokenStore.load();
+	const api = new V2exApi(tokenStore);
+	const member = await api.getMyMember();
+
+	return markValidated(state, {
+		status: 'ready',
+		identity: {
+			id: String(member.id),
+			displayName: member.username,
+		},
+	});
+}
+
+async function validateDouban(
+	state: LocalAccountState,
+): Promise<AccountStateSnapshot> {
+	return state;
+}
+
+async function validateBsky(
+	state: LocalAccountState,
+): Promise<AccountStateSnapshot> {
+	return state;
+}
+
 async function validateAi(
 	state: LocalAccountState,
 ): Promise<AccountStateSnapshot> {
@@ -211,6 +295,26 @@ async function resolveLocalState(
 			return probeWeiboLocalState();
 		}
 
+		case 'reddit': {
+			return probeRedditLocalState();
+		}
+
+		case 'hn': {
+			return probeHnLocalState();
+		}
+
+		case 'v2ex': {
+			return probeV2exLocalState();
+		}
+
+		case 'douban': {
+			return probeDoubanLocalState();
+		}
+
+		case 'bsky': {
+			return probeBskyLocalState();
+		}
+
 		case 'ai': {
 			return probeAiLocalState();
 		}
@@ -249,6 +353,26 @@ export async function getPlatformAccountState(
 
 			case 'weibo': {
 				return await validateWeibo(localState);
+			}
+
+			case 'reddit': {
+				return await validateReddit(localState);
+			}
+
+			case 'hn': {
+				return await validateHn(localState);
+			}
+
+			case 'v2ex': {
+				return await validateV2ex(localState);
+			}
+
+			case 'douban': {
+				return await validateDouban(localState);
+			}
+
+			case 'bsky': {
+				return await validateBsky(localState);
 			}
 
 			case 'ai': {

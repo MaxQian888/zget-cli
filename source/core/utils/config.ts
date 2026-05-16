@@ -20,6 +20,21 @@ export const biliCookieFile = join(configDir, 'bili-cookies.json');
 // Weibo (微博)
 export const weiboCookieFile = join(configDir, 'weibo-cookies.json');
 
+// Reddit
+export const redditCredentialsFile = join(configDir, 'reddit-credentials.json');
+
+// Hacker News
+export const hnCookieFile = join(configDir, 'hn-cookies.json');
+
+// V2EX
+export const v2exTokenFile = join(configDir, 'v2ex-token.json');
+
+// Douban (豆瓣)
+export const doubanCookieFile = join(configDir, 'douban-cookies.json');
+
+// Bluesky
+export const bskySessionFile = join(configDir, 'bsky-session.json');
+
 // AI
 export const aiConfigFile = join(configDir, 'ai-config.json');
 

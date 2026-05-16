@@ -144,6 +144,76 @@ Usage
     $ zget weibo post "<text>" [--image photo.jpg]   Publish a status (≤9 images)
     $ zget weibo <url>                  Download status as Markdown
 
+  Hacker News Commands
+    $ zget hn login                     Login via browser cookie capture
+    $ zget hn whoami                    Show current user
+    $ zget hn logout                    Clear saved cookies
+    $ zget hn top|best|new|ask|show|jobs   Front pages (--limit N)
+    $ zget hn search <query>            Algolia search (--limit N)
+    $ zget hn item <id>                 Read a story / comment
+    $ zget hn user <name>               Show a user profile
+    $ zget hn user-submitted <name>     List a user's recent submissions
+    $ zget hn comments <id>             Print a story's comment tree
+    $ zget hn upvote <id>               Upvote a story or comment
+    $ zget hn unvote <id>               Cancel an upvote
+    $ zget hn favorite <id>             Favorite an item
+    $ zget hn unfavorite <id>           Unfavorite an item
+    $ zget hn comment <id> -t "<text>"  Reply to a story or comment
+    $ zget hn delete <id> --yes         Delete your story or comment
+    $ zget hn submit -t "<title>" --content <url|text>   Submit a story
+    $ zget hn download <id|url>         Save item + comments as Markdown
+
+  V2EX Commands
+    $ zget v2ex login --cookie <token>  Save Personal Access Token
+    $ zget v2ex whoami                  Show current user
+    $ zget v2ex logout                  Clear saved token
+    $ zget v2ex hot                     Show hot topics (--limit N)
+    $ zget v2ex latest                  Show latest topics (--limit N)
+    $ zget v2ex node <name>             Show a node's metadata
+    $ zget v2ex topics <name>           List a node's topics
+    $ zget v2ex topic <id>              Read a topic
+    $ zget v2ex replies <id>            List a topic's replies
+    $ zget v2ex member <name>           Show a member profile
+    $ zget v2ex notifications           Show your notifications
+    $ zget v2ex my-topics               Show your recent topics
+    $ zget v2ex my-following            Show topics you're following
+    $ zget v2ex collect <id>            Collect (bookmark) a topic
+    $ zget v2ex uncollect <id>          Remove a topic from collection
+    $ zget v2ex thank-topic <id>        Thank a topic
+    $ zget v2ex thank-reply <id>        Thank a reply
+    $ zget v2ex reply <id> -t "<text>"  Reply to a topic
+    $ zget v2ex delete-reply <id> --yes Delete one of your replies
+    $ zget v2ex new-topic <node> -t "<title>" --content "<body>"   Post a new topic
+    $ zget v2ex download <id|url>       Save topic + replies as Markdown
+
+  Reddit Commands
+    $ zget reddit login --cookie '{"clientId":"...","clientSecret":"...","username":"...","password":"..."}'  Save OAuth2 script-app credentials
+    $ zget reddit whoami                Show current user
+    $ zget reddit logout                Clear saved credentials
+    $ zget reddit hot [sub]             Front page hot (or r/<sub>)
+    $ zget reddit top [sub]             Top posts (or r/<sub>)
+    $ zget reddit new [sub]             Newest posts (or r/<sub>)
+    $ zget reddit search <query>        Search posts
+    $ zget reddit subreddit <name>      Show subreddit metadata
+    $ zget reddit read <postId>         Read a post
+    $ zget reddit comments <postId>     List a post's comment tree
+    $ zget reddit user <name>           Show a user profile
+    $ zget reddit user-posts <name>     List a user's submissions
+    $ zget reddit user-comments <name>  List a user's comments
+    $ zget reddit saved                 Your saved items
+    $ zget reddit subscribed            Subreddits you're subscribed to
+    $ zget reddit upvote <id>           Upvote a post or comment
+    $ zget reddit downvote <id>         Downvote
+    $ zget reddit unvote <id>           Cancel a vote
+    $ zget reddit save <id>             Save a post or comment
+    $ zget reddit unsave <id>           Unsave
+    $ zget reddit subscribe <sub>       Subscribe to a subreddit
+    $ zget reddit unsubscribe <sub>     Unsubscribe
+    $ zget reddit comment <id> -t "<text>"  Reply to a post or comment
+    $ zget reddit delete <id> --yes     Delete your post or comment
+    $ zget reddit submit <sub> -t "<title>" --content "<url-or-text>"  Submit a post
+    $ zget reddit download <id|url>     Save post + comments as Markdown
+
   AI Summary
     $ zget summary <url>                Summarize content from any URL
 
@@ -183,6 +253,9 @@ Usage
     - XHS (小红书):        xiaohongshu.com, xhslink.com
     - Bilibili (哔哩哔哩):  bilibili.com, b23.tv
     - Weibo (微博):        weibo.com, m.weibo.cn, s.weibo.com
+    - Hacker News:        news.ycombinator.com
+    - V2EX:               v2ex.com
+    - Reddit:             reddit.com, redd.it
 ```
 
 ## Options

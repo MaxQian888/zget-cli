@@ -8,5 +8,10 @@
 	"readme": "none",
 	"cleanOutputDir": true,
 	"hideGenerator": true,
-	"sourceLinkTemplate": "https://github.com/AstroAir/react-cli-quick-starter/blob/main/{path}#L{line}"
+	"sourceLinkTemplate": "https://github.com/AstroAir/react-cli-quick-starter/blob/main/{path}#L{line}",
+	"validation": {
+		"notExported": false,
+		"invalidLink": true,
+		"notDocumented": false
+	}
 }

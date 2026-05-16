@@ -785,6 +785,338 @@ export function resolveCommand(
 		};
 	}
 
+	// --- Hacker News commands ---
+	if (first === 'hn') {
+		if (!second) {
+			exitWithError(
+				'Error: hn requires a subcommand (top, search, item, login, etc.)\n',
+				stderr,
+				exit,
+			);
+		}
+
+		const hnCommandMap: Record<string, ResolvedCommand['command']> = {
+			login: 'hn-login',
+			logout: 'hn-logout',
+			whoami: 'hn-whoami',
+			me: 'hn-whoami',
+			top: 'hn-top',
+			best: 'hn-best',
+			new: 'hn-new',
+			ask: 'hn-ask',
+			show: 'hn-show',
+			jobs: 'hn-jobs',
+			search: 'hn-search',
+			item: 'hn-item',
+			read: 'hn-item',
+			user: 'hn-user',
+			'user-submitted': 'hn-user-submitted',
+			submitted: 'hn-user-submitted',
+			comments: 'hn-comments',
+			upvote: 'hn-upvote',
+			unvote: 'hn-unvote',
+			favorite: 'hn-favorite',
+			fave: 'hn-favorite',
+			unfavorite: 'hn-unfavorite',
+			unfave: 'hn-unfavorite',
+			comment: 'hn-comment',
+			delete: 'hn-delete',
+			submit: 'hn-submit',
+			post: 'hn-submit',
+			download: 'hn-download',
+		};
+
+		const cmd = hnCommandMap[second];
+		if (!cmd) {
+			// Maybe it's a URL: hn https://news.ycombinator.com/item?id=...
+			const parsed = parseUrlImpl(second);
+			if (parsed.platform === 'hn' && parsed.type === 'item') {
+				return {command: 'hn-download', url: parsed.id, flags, format};
+			}
+
+			if (parsed.platform === 'hn' && parsed.type === 'user') {
+				return {command: 'hn-user', url: parsed.username, flags, format};
+			}
+
+			exitWithError(`Error: unknown hn subcommand: ${second}\n`, stderr, exit);
+		}
+
+		const hnCommandsWithoutArguments = new Set([
+			'top',
+			'best',
+			'new',
+			'ask',
+			'show',
+			'jobs',
+			'login',
+			'logout',
+			'whoami',
+			'me',
+		]);
+		if (!hnCommandsWithoutArguments.has(second) && !third) {
+			exitWithError(`Error: hn ${second} requires an argument\n`, stderr, exit);
+		}
+
+		if (cmd === 'hn-submit') {
+			return {
+				command: cmd,
+				url: undefined,
+				flags,
+				limit,
+				format,
+				text: text ?? third,
+				content,
+				extraArgs: cli.input.slice(3),
+			};
+		}
+
+		return {
+			command: cmd,
+			url: third,
+			flags,
+			limit,
+			format,
+			text: text ?? undefined,
+			yes,
+			extraArgs: cli.input.slice(3),
+		};
+	}
+
+	// --- V2EX commands ---
+	if (first === 'v2ex') {
+		if (!second) {
+			exitWithError(
+				'Error: v2ex requires a subcommand (hot, latest, topic, login, etc.)\n',
+				stderr,
+				exit,
+			);
+		}
+
+		const v2exCommandMap: Record<string, ResolvedCommand['command']> = {
+			login: 'v2ex-login',
+			logout: 'v2ex-logout',
+			whoami: 'v2ex-whoami',
+			me: 'v2ex-whoami',
+			hot: 'v2ex-hot',
+			latest: 'v2ex-latest',
+			node: 'v2ex-node',
+			topics: 'v2ex-topics',
+			topic: 'v2ex-topic',
+			read: 'v2ex-topic',
+			replies: 'v2ex-replies',
+			member: 'v2ex-member',
+			user: 'v2ex-member',
+			notifications: 'v2ex-notifications',
+			'my-topics': 'v2ex-my-topics',
+			'my-following': 'v2ex-my-following',
+			collect: 'v2ex-collect',
+			uncollect: 'v2ex-uncollect',
+			'thank-topic': 'v2ex-thank-topic',
+			thank: 'v2ex-thank-topic',
+			'thank-reply': 'v2ex-thank-reply',
+			reply: 'v2ex-reply',
+			'delete-reply': 'v2ex-delete-reply',
+			'new-topic': 'v2ex-new-topic',
+			submit: 'v2ex-new-topic',
+			download: 'v2ex-download',
+		};
+
+		const cmd = v2exCommandMap[second];
+		if (!cmd) {
+			const parsed = parseUrlImpl(second);
+			if (parsed.platform === 'v2ex' && parsed.type === 'topic') {
+				return {command: 'v2ex-download', url: parsed.topicId, flags, format};
+			}
+
+			if (parsed.platform === 'v2ex' && parsed.type === 'member') {
+				return {command: 'v2ex-member', url: parsed.username, flags, format};
+			}
+
+			if (parsed.platform === 'v2ex' && parsed.type === 'node') {
+				return {command: 'v2ex-node', url: parsed.nodeName, flags, format};
+			}
+
+			exitWithError(
+				`Error: unknown v2ex subcommand: ${second}\n`,
+				stderr,
+				exit,
+			);
+		}
+
+		const v2exCommandsWithoutArguments = new Set([
+			'hot',
+			'latest',
+			'login',
+			'logout',
+			'whoami',
+			'me',
+			'notifications',
+			'my-topics',
+			'my-following',
+		]);
+		if (!v2exCommandsWithoutArguments.has(second) && !third) {
+			exitWithError(
+				`Error: v2ex ${second} requires an argument\n`,
+				stderr,
+				exit,
+			);
+		}
+
+		if (cmd === 'v2ex-new-topic') {
+			return {
+				command: cmd,
+				url: third,
+				flags,
+				format,
+				text: text ?? undefined,
+				content,
+				extraArgs: cli.input.slice(3),
+			};
+		}
+
+		if (cmd === 'v2ex-login') {
+			return {
+				command: cmd,
+				flags,
+				format,
+				cookie,
+			};
+		}
+
+		return {
+			command: cmd,
+			url: third,
+			flags,
+			limit,
+			format,
+			text: text ?? undefined,
+			yes,
+			extraArgs: cli.input.slice(3),
+		};
+	}
+
+	// --- Reddit commands ---
+	if (first === 'reddit') {
+		if (!second) {
+			exitWithError(
+				'Error: reddit requires a subcommand (hot, search, read, login, etc.)\n',
+				stderr,
+				exit,
+			);
+		}
+
+		const redditCommandMap: Record<string, ResolvedCommand['command']> = {
+			login: 'reddit-login',
+			logout: 'reddit-logout',
+			whoami: 'reddit-whoami',
+			me: 'reddit-whoami',
+			search: 'reddit-search',
+			subreddit: 'reddit-subreddit',
+			sub: 'reddit-subreddit',
+			hot: 'reddit-hot',
+			top: 'reddit-top',
+			new: 'reddit-new',
+			read: 'reddit-read',
+			post: 'reddit-read',
+			comments: 'reddit-comments',
+			user: 'reddit-user',
+			'user-posts': 'reddit-user-posts',
+			'user-comments': 'reddit-user-comments',
+			saved: 'reddit-saved',
+			subscribed: 'reddit-subscribed',
+			upvote: 'reddit-upvote',
+			downvote: 'reddit-downvote',
+			unvote: 'reddit-unvote',
+			save: 'reddit-save',
+			unsave: 'reddit-unsave',
+			subscribe: 'reddit-subscribe',
+			unsubscribe: 'reddit-unsubscribe',
+			comment: 'reddit-comment',
+			delete: 'reddit-delete',
+			submit: 'reddit-submit',
+			download: 'reddit-download',
+		};
+
+		const cmd = redditCommandMap[second];
+		if (!cmd) {
+			const parsed = parseUrlImpl(second);
+			if (parsed.platform === 'reddit' && parsed.type === 'post') {
+				return {
+					command: 'reddit-download',
+					url: parsed.postId,
+					flags,
+					format,
+					extraArgs: parsed.subreddit ? [parsed.subreddit] : undefined,
+				};
+			}
+
+			if (parsed.platform === 'reddit' && parsed.type === 'user') {
+				return {command: 'reddit-user', url: parsed.username, flags, format};
+			}
+
+			if (parsed.platform === 'reddit' && parsed.type === 'subreddit') {
+				return {
+					command: 'reddit-subreddit',
+					url: parsed.subreddit,
+					flags,
+					format,
+				};
+			}
+
+			exitWithError(
+				`Error: unknown reddit subcommand: ${second}\n`,
+				stderr,
+				exit,
+			);
+		}
+
+		const redditCommandsWithoutArguments = new Set([
+			'login',
+			'logout',
+			'whoami',
+			'me',
+			'hot',
+			'top',
+			'new',
+			'saved',
+			'subscribed',
+		]);
+		if (!redditCommandsWithoutArguments.has(second) && !third) {
+			exitWithError(
+				`Error: reddit ${second} requires an argument\n`,
+				stderr,
+				exit,
+			);
+		}
+
+		if (cmd === 'reddit-submit') {
+			return {
+				command: cmd,
+				url: third,
+				flags,
+				format,
+				text: text ?? undefined,
+				content,
+				extraArgs: cli.input.slice(3),
+			};
+		}
+
+		if (cmd === 'reddit-login') {
+			return {command: cmd, flags, format, cookie};
+		}
+
+		return {
+			command: cmd,
+			url: third,
+			flags,
+			limit,
+			format,
+			text: text ?? undefined,
+			yes,
+			extraArgs: cli.input.slice(3),
+		};
+	}
+
 	// --- AI Summary ---
 	if (first === 'summary') {
 		if (!second) {

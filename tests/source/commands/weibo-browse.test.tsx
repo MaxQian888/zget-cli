@@ -323,4 +323,150 @@ describe('WeiboBrowseCommand', () => {
 		await flushAsync();
 		expect(view.lastFrame()).toContain('Unsupported');
 	});
+
+	it('falls back when user fields are missing', async () => {
+		mocks.api.getUser.mockResolvedValue({
+			id: 4,
+			screen_name: undefined,
+			description: undefined,
+			location: undefined,
+			followers_count: 0,
+			friends_count: 0,
+			statuses_count: 0,
+			verified: false,
+		});
+		const view = render(
+			<WeiboBrowseCommand
+				browseType="weibo-user"
+				query="someone"
+				flags={baseFlags}
+			/>,
+		);
+		await flushAsync();
+		const frame = view.lastFrame() ?? '';
+		expect(frame).toContain('未认证');
+	});
+
+	it('falls back when search/post/comment/follower fields are missing', async () => {
+		mocks.api.search.mockResolvedValue([
+			{mid: 'm1', text: 'plain', user_screen_name: undefined},
+		]);
+		mocks.api.getFeed.mockResolvedValue([
+			{
+				idstr: 's1',
+				mid: 's1',
+				created_at: '',
+				user: undefined,
+				text: 'fallback feed text',
+				text_raw: undefined,
+			},
+		]);
+		mocks.api.getStatus.mockResolvedValue({
+			idstr: 's2',
+			mid: 's2',
+			created_at: '2026-05-01',
+			user: undefined,
+			text: 'fallback body',
+			text_raw: undefined,
+			attitudes_count: 0,
+			comments_count: 0,
+			reposts_count: 0,
+		});
+		mocks.api.getComments.mockResolvedValue([
+			{
+				id: 1,
+				created_at: '',
+				text: 'cmt-fallback',
+				text_raw: undefined,
+				user: undefined,
+				like_counts: 0,
+			},
+		]);
+		mocks.api.getFavorites.mockResolvedValue([
+			{
+				idstr: 'f1',
+				mid: 'f1',
+				created_at: '',
+				user: undefined,
+				text: 'fav-fallback',
+				text_raw: undefined,
+			},
+		]);
+		mocks.api.getUserPosts.mockResolvedValue([
+			{
+				idstr: 'p1',
+				mid: 'p1',
+				created_at: '2026-05-01',
+				user: undefined,
+				text: 'post-fallback',
+				text_raw: undefined,
+			},
+		]);
+
+		const searchView = render(
+			<WeiboBrowseCommand
+				browseType="weibo-search"
+				query="x"
+				flags={baseFlags}
+				limit={1}
+			/>,
+		);
+		await flushAsync();
+		expect(searchView.lastFrame() ?? '').toContain('plain');
+
+		const feedView = render(
+			<WeiboBrowseCommand
+				browseType="weibo-feed"
+				query=""
+				flags={baseFlags}
+				limit={1}
+			/>,
+		);
+		await flushAsync();
+		expect(feedView.lastFrame() ?? '').toContain('fallback feed text');
+
+		const readView = render(
+			<WeiboBrowseCommand
+				browseType="weibo-read"
+				query="s2"
+				flags={baseFlags}
+				limit={1}
+			/>,
+		);
+		await flushAsync();
+		expect(readView.lastFrame() ?? '').toContain('fallback body');
+
+		const commentsView = render(
+			<WeiboBrowseCommand
+				browseType="weibo-comments"
+				query="s2"
+				flags={baseFlags}
+				limit={1}
+			/>,
+		);
+		await flushAsync();
+		expect(commentsView.lastFrame() ?? '').toContain('cmt-fallback');
+
+		const favsView = render(
+			<WeiboBrowseCommand
+				browseType="weibo-favorites"
+				query=""
+				flags={baseFlags}
+				limit={1}
+			/>,
+		);
+		await flushAsync();
+		expect(favsView.lastFrame() ?? '').toContain('fav-fallback');
+
+		const postsView = render(
+			<WeiboBrowseCommand
+				browseType="weibo-posts"
+				query="123"
+				flags={baseFlags}
+				limit={1}
+			/>,
+		);
+		await flushAsync();
+		expect(postsView.lastFrame() ?? '').toContain('post-fallback');
+	});
 });

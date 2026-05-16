@@ -6,6 +6,11 @@ const {
 	probeXhsLocalStateMock,
 	probeBiliLocalStateMock,
 	probeWeiboLocalStateMock,
+	probeRedditLocalStateMock,
+	probeHnLocalStateMock,
+	probeV2exLocalStateMock,
+	probeDoubanLocalStateMock,
+	probeBskyLocalStateMock,
 	probeAiLocalStateMock,
 	xCredentialStoreLoadMock,
 	xApiGetMyUserMock,
@@ -15,6 +20,11 @@ const {
 	probeXhsLocalStateMock: vi.fn(),
 	probeBiliLocalStateMock: vi.fn(),
 	probeWeiboLocalStateMock: vi.fn(),
+	probeRedditLocalStateMock: vi.fn(),
+	probeHnLocalStateMock: vi.fn(),
+	probeV2exLocalStateMock: vi.fn(),
+	probeDoubanLocalStateMock: vi.fn(),
+	probeBskyLocalStateMock: vi.fn(),
 	probeAiLocalStateMock: vi.fn(),
 	xCredentialStoreLoadMock: vi.fn(),
 	xApiGetMyUserMock: vi.fn(),
@@ -26,6 +36,11 @@ vi.mock('../../../source/core/account/platform-probes', () => ({
 	probeXhsLocalState: probeXhsLocalStateMock,
 	probeBiliLocalState: probeBiliLocalStateMock,
 	probeWeiboLocalState: probeWeiboLocalStateMock,
+	probeRedditLocalState: probeRedditLocalStateMock,
+	probeHnLocalState: probeHnLocalStateMock,
+	probeV2exLocalState: probeV2exLocalStateMock,
+	probeDoubanLocalState: probeDoubanLocalStateMock,
+	probeBskyLocalState: probeBskyLocalStateMock,
 	probeAiLocalState: probeAiLocalStateMock,
 }));
 
@@ -70,6 +85,31 @@ describe('account status snapshots', () => {
 		});
 		probeWeiboLocalStateMock.mockReset().mockResolvedValue({
 			platform: 'weibo',
+			status: 'missing',
+			credentialSource: 'none',
+		});
+		probeRedditLocalStateMock.mockReset().mockResolvedValue({
+			platform: 'reddit',
+			status: 'missing',
+			credentialSource: 'none',
+		});
+		probeHnLocalStateMock.mockReset().mockResolvedValue({
+			platform: 'hn',
+			status: 'missing',
+			credentialSource: 'none',
+		});
+		probeV2exLocalStateMock.mockReset().mockResolvedValue({
+			platform: 'v2ex',
+			status: 'missing',
+			credentialSource: 'none',
+		});
+		probeDoubanLocalStateMock.mockReset().mockResolvedValue({
+			platform: 'douban',
+			status: 'missing',
+			credentialSource: 'none',
+		});
+		probeBskyLocalStateMock.mockReset().mockResolvedValue({
+			platform: 'bsky',
 			status: 'missing',
 			credentialSource: 'none',
 		});

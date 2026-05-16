@@ -37,6 +37,12 @@ function toPlatformKey(
 		url === 'x' ||
 		url === 'xhs' ||
 		url === 'bili' ||
+		url === 'weibo' ||
+		url === 'reddit' ||
+		url === 'hn' ||
+		url === 'v2ex' ||
+		url === 'douban' ||
+		url === 'bsky' ||
 		url === 'ai'
 	) {
 		return url;

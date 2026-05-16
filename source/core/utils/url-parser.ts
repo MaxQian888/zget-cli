@@ -6,7 +6,12 @@ export type Platform =
 	| 'x'
 	| 'xhs'
 	| 'bili'
-	| 'weibo';
+	| 'weibo'
+	| 'reddit'
+	| 'hn'
+	| 'v2ex'
+	| 'douban'
+	| 'bsky';
 
 export type ParsedUrl =
 	// Zhihu
@@ -40,6 +45,32 @@ export type ParsedUrl =
 			isMblogId?: boolean;
 	  }
 	| {platform: 'weibo'; type: 'user'; uid?: string; screenName?: string}
+	// Reddit
+	| {
+			platform: 'reddit';
+			type: 'post';
+			subreddit: string;
+			postId: string;
+			slug?: string;
+	  }
+	| {platform: 'reddit'; type: 'subreddit'; subreddit: string}
+	| {platform: 'reddit'; type: 'user'; username: string}
+	// Hacker News
+	| {platform: 'hn'; type: 'item'; id: string}
+	| {platform: 'hn'; type: 'user'; username: string}
+	// V2EX
+	| {platform: 'v2ex'; type: 'topic'; topicId: string}
+	| {platform: 'v2ex'; type: 'member'; username: string}
+	| {platform: 'v2ex'; type: 'node'; nodeName: string}
+	// Douban (豆瓣)
+	| {platform: 'douban'; type: 'movie'; subjectId: string}
+	| {platform: 'douban'; type: 'book'; subjectId: string}
+	| {platform: 'douban'; type: 'group-topic'; topicId: string}
+	| {platform: 'douban'; type: 'group'; groupId: string}
+	| {platform: 'douban'; type: 'people'; userId: string}
+	// Bluesky
+	| {platform: 'bsky'; type: 'post'; handle: string; rkey: string}
+	| {platform: 'bsky'; type: 'profile'; handle: string}
 	// Unknown
 	| {platform: 'unknown'; type: 'unknown'; raw: string};
 
@@ -225,6 +256,136 @@ export function parseUrl(input: string): ParsedUrl {
 		};
 	}
 
+	// --- Reddit ---
+	// Post: reddit.com/r/<sub>/comments/<id>/<slug>?
+	const redditPostMatch =
+		/reddit\.com\/r\/([^/?#]+)\/comments\/([a-z\d]+)(?:\/([^/?#]+))?/i.exec(
+			url,
+		);
+	if (redditPostMatch) {
+		return {
+			platform: 'reddit',
+			type: 'post',
+			subreddit: redditPostMatch[1]!,
+			postId: redditPostMatch[2]!,
+			slug: redditPostMatch[3],
+		};
+	}
+
+	// Short link: redd.it/<id>
+	const reddItMatch = /redd\.it\/([a-z\d]+)/i.exec(url);
+	if (reddItMatch) {
+		return {
+			platform: 'reddit',
+			type: 'post',
+			subreddit: '',
+			postId: reddItMatch[1]!,
+		};
+	}
+
+	// User: reddit.com/user/<name> or reddit.com/u/<name>
+	const redditUserMatch = /reddit\.com\/(?:user|u)\/([^/?#]+)/i.exec(url);
+	if (redditUserMatch) {
+		return {platform: 'reddit', type: 'user', username: redditUserMatch[1]!};
+	}
+
+	// Subreddit: reddit.com/r/<sub>
+	const redditSubMatch = /reddit\.com\/r\/([^/?#]+)/i.exec(url);
+	if (redditSubMatch) {
+		return {
+			platform: 'reddit',
+			type: 'subreddit',
+			subreddit: redditSubMatch[1]!,
+		};
+	}
+
+	// --- Hacker News ---
+	// Item: news.ycombinator.com/item?id=<n>
+	const hnItemMatch = /news\.ycombinator\.com\/item\?id=(\d+)/i.exec(url);
+	if (hnItemMatch) {
+		return {platform: 'hn', type: 'item', id: hnItemMatch[1]!};
+	}
+
+	// User: news.ycombinator.com/user?id=<name>
+	const hnUserMatch = /news\.ycombinator\.com\/user\?id=([^&#]+)/i.exec(url);
+	if (hnUserMatch) {
+		return {platform: 'hn', type: 'user', username: hnUserMatch[1]!};
+	}
+
+	// --- V2EX ---
+	// Topic: v2ex.com/t/<id>
+	const v2exTopicMatch = /v2ex\.com\/t\/(\d+)/i.exec(url);
+	if (v2exTopicMatch) {
+		return {platform: 'v2ex', type: 'topic', topicId: v2exTopicMatch[1]!};
+	}
+
+	// Member: v2ex.com/member/<name>
+	const v2exMemberMatch = /v2ex\.com\/member\/([^/?#]+)/i.exec(url);
+	if (v2exMemberMatch) {
+		return {platform: 'v2ex', type: 'member', username: v2exMemberMatch[1]!};
+	}
+
+	// Node: v2ex.com/go/<node>
+	const v2exNodeMatch = /v2ex\.com\/go\/([^/?#]+)/i.exec(url);
+	if (v2exNodeMatch) {
+		return {platform: 'v2ex', type: 'node', nodeName: v2exNodeMatch[1]!};
+	}
+
+	// --- Douban (豆瓣) ---
+	// Movie: movie.douban.com/subject/<id>
+	const doubanMovieMatch = /movie\.douban\.com\/subject\/(\d+)/i.exec(url);
+	if (doubanMovieMatch) {
+		return {platform: 'douban', type: 'movie', subjectId: doubanMovieMatch[1]!};
+	}
+
+	// Book: book.douban.com/subject/<id>
+	const doubanBookMatch = /book\.douban\.com\/subject\/(\d+)/i.exec(url);
+	if (doubanBookMatch) {
+		return {platform: 'douban', type: 'book', subjectId: doubanBookMatch[1]!};
+	}
+
+	// Group topic: douban.com/group/topic/<id>
+	const doubanGroupTopicMatch = /douban\.com\/group\/topic\/(\d+)/i.exec(url);
+	if (doubanGroupTopicMatch) {
+		return {
+			platform: 'douban',
+			type: 'group-topic',
+			topicId: doubanGroupTopicMatch[1]!,
+		};
+	}
+
+	// Group: douban.com/group/<name-or-id>
+	const doubanGroupMatch = /douban\.com\/group\/([^/?#]+)/i.exec(url);
+	if (doubanGroupMatch) {
+		return {platform: 'douban', type: 'group', groupId: doubanGroupMatch[1]!};
+	}
+
+	// People: douban.com/people/<id>
+	const doubanPeopleMatch = /douban\.com\/people\/([^/?#]+)/i.exec(url);
+	if (doubanPeopleMatch) {
+		return {platform: 'douban', type: 'people', userId: doubanPeopleMatch[1]!};
+	}
+
+	// --- Bluesky ---
+	// Post: bsky.app/profile/<handle>/post/<rkey>
+	const bskyPostMatch = /bsky\.app\/profile\/([^/?#]+)\/post\/([^/?#]+)/i.exec(
+		url,
+	);
+	if (bskyPostMatch) {
+		return {
+			platform: 'bsky',
+			type: 'post',
+			handle: bskyPostMatch[1]!,
+			rkey: bskyPostMatch[2]!,
+		};
+	}
+
+	// Profile: bsky.app/profile/<handle>
+	const bskyProfileMatch = /bsky\.app\/profile\/([^/?#]+)/i.exec(url);
+	if (bskyProfileMatch) {
+		return {platform: 'bsky', type: 'profile', handle: bskyProfileMatch[1]!};
+	}
+
 	return {platform: 'unknown', type: 'unknown', raw: url};
 }
 
@@ -269,6 +430,58 @@ export function buildWeiboUserUrl(uid: string): string {
 	return `https://weibo.com/u/${uid}`;
 }
 
+export function buildRedditPostUrl(subreddit: string, postId: string): string {
+	return `https://www.reddit.com/r/${subreddit}/comments/${postId}`;
+}
+
+export function buildRedditUserUrl(username: string): string {
+	return `https://www.reddit.com/user/${username}`;
+}
+
+export function buildRedditSubredditUrl(subreddit: string): string {
+	return `https://www.reddit.com/r/${subreddit}`;
+}
+
+export function buildHnItemUrl(id: string): string {
+	return `https://news.ycombinator.com/item?id=${id}`;
+}
+
+export function buildHnUserUrl(username: string): string {
+	return `https://news.ycombinator.com/user?id=${username}`;
+}
+
+export function buildV2exTopicUrl(topicId: string): string {
+	return `https://v2ex.com/t/${topicId}`;
+}
+
+export function buildV2exMemberUrl(username: string): string {
+	return `https://v2ex.com/member/${username}`;
+}
+
+export function buildV2exNodeUrl(nodeName: string): string {
+	return `https://v2ex.com/go/${nodeName}`;
+}
+
+export function buildDoubanMovieUrl(subjectId: string): string {
+	return `https://movie.douban.com/subject/${subjectId}/`;
+}
+
+export function buildDoubanBookUrl(subjectId: string): string {
+	return `https://book.douban.com/subject/${subjectId}/`;
+}
+
+export function buildDoubanGroupTopicUrl(topicId: string): string {
+	return `https://www.douban.com/group/topic/${topicId}/`;
+}
+
+export function buildBskyPostUrl(handle: string, rkey: string): string {
+	return `https://bsky.app/profile/${handle}/post/${rkey}`;
+}
+
+export function buildBskyProfileUrl(handle: string): string {
+	return `https://bsky.app/profile/${handle}`;
+}
+
 export function getPlatformName(platform: Platform | 'unknown'): string {
 	const names: Record<string, string> = {
 		zhihu: '知乎',
@@ -279,6 +492,11 @@ export function getPlatformName(platform: Platform | 'unknown'): string {
 		xhs: '小红书',
 		bili: 'Bilibili (哔哩哔哩)',
 		weibo: '微博',
+		reddit: 'Reddit',
+		hn: 'Hacker News',
+		v2ex: 'V2EX',
+		douban: '豆瓣',
+		bsky: 'Bluesky',
 		unknown: '未知',
 	};
 	return names[platform] ?? platform;
