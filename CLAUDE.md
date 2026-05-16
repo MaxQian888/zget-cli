@@ -4,7 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-`zget-cli` is an Ink-based React CLI (Node 20+, ESM, TypeScript) that downloads, browses, and (when authenticated) interacts with content across seven Chinese/international platforms: Zhihu, X (Twitter), 小红书 (XHS), Bilibili, CSDN, WeChat, and Juejin. It also exposes an AI summary command across multiple LLM providers. The package ships a single `zget` binary (`bin: dist/cli.js`).
+`zget-cli` is an Ink-based React CLI (Node 20+, ESM, TypeScript) that downloads, browses, and (when authenticated) interacts with content across eleven Chinese/international platforms:
+
+- **Read-only scrapers:** CSDN, WeChat (微信公众号), Juejin (掘金)
+- **Authenticated read + interact + publish:** Zhihu (知乎), X (Twitter), 小红书 (XHS), Bilibili (哔哩哔哩), Weibo (微博), Hacker News, V2EX, Reddit
+
+It also exposes an AI summary command across multiple LLM providers (OpenAI, Anthropic, DeepSeek, plus any OpenAI-compatible base URL). The package ships a single `zget` binary (`bin: dist/cli.js`).
+
+Two more platforms (Douban, Bluesky) are scaffolded at the URL-parser and account-center level but do **not** yet have user-facing commands — treat them as work-in-progress, not part of the public surface.
 
 Package manager: **pnpm** (frozen lockfile in CI). The `prepare` script installs `simple-git-hooks` automatically on `pnpm install`.
 
@@ -86,7 +93,7 @@ process.argv
                                             and mounts the matching Ink command component
 ```
 
-`resolveCommand` in `source/cli.tsx` is the central router. It first matches subcommand families (`x`, `bili`, `xhs`, `summary`, then Zhihu browse/download), and finally falls back to `parseUrl()` auto-detection. New commands must be added in **three places**:
+`resolveCommand` in `source/cli.tsx` is the central router. It first matches subcommand families (`x`, `bili`, `weibo`, `hn`, `v2ex`, `reddit`, `xhs`, `summary`, then `zhihu <verb>`), then top-level Zhihu browse/download verbs, and finally falls back to `parseUrl()` auto-detection. New commands must be added in **four places**:
 
 1. `CommandName` union in `source/commands/types.ts`
 2. Routing branch in `source/cli.tsx` (`resolveCommand`)
@@ -102,16 +109,21 @@ source/
 ├── app.tsx                  # command → component dispatcher
 ├── commands/                # one Ink component per command family
 │   ├── ui-{home,account-center,account-platform}.tsx   # interactive Ink screens
-│   ├── {download,column,user,browse,login}.tsx         # Zhihu
+│   ├── {download,column,user,browse,login}.tsx         # Zhihu (download + top-level browse + login)
+│   ├── zhihu-{account,interact,list,publish,delete}.tsx  # Zhihu account/interact/list/publish/delete
 │   ├── x-{browse,interact,download,login}.tsx          # X (Twitter)
 │   ├── xhs-{browse,interact,download,login,publish}.tsx
 │   ├── bili-{browse,interact,download,login}.tsx
+│   ├── weibo-{browse,interact,download,login,publish}.tsx
+│   ├── hn-{browse,interact,download,login,publish}.tsx       # Hacker News
+│   ├── v2ex-{browse,interact,download,login,publish}.tsx
+│   ├── reddit-{browse,interact,download,login,publish}.tsx
 │   ├── platform-download.tsx                           # CSDN/WeChat/Juejin
 │   ├── summary.tsx                                     # AI summary
 │   └── types.ts             # CommandName union, ResolvedCommand, GlobalFlags
 ├── components/              # reusable Ink UI (download-progress, qr-code, etc.)
 └── core/                    # platform-agnostic logic, organized by domain
-    ├── api/                 # HTTP clients per platform (zhihu, bili, x, xhs)
+    ├── api/                 # HTTP clients per platform (zhihu, bili, x, xhs, weibo, hn, v2ex, reddit)
     ├── auth/                # cookie stores + login flows per platform
     ├── account/             # unified account-center probes/actions/snapshots
     ├── downloader/          # orchestration + per-platform downloaders (incl. platforms/)
@@ -140,15 +152,19 @@ This section is the canonical contract between `zget` and AI agents that drive i
 
 ### Auth model (per platform)
 
-| Platform               | Login command     | Mechanism                                  | Persisted at                     |
-| ---------------------- | ----------------- | ------------------------------------------ | -------------------------------- |
-| Zhihu                  | `zget login`      | QR code (60s window)                       | `~/.zget-cli/zhihu-cookies.json` |
-| Bilibili               | `zget bili login` | QR code                                    | `~/.zget-cli/bili-cookies.json`  |
-| X (Twitter)            | `zget x login`    | API credentials (env or interactive)       | `~/.zget-cli/x-credentials.json` |
-| XHS                    | `zget xhs login`  | Browser-driven cookie capture (Playwright) | `~/.zget-cli/xhs-cookies.json`   |
-| CSDN / WeChat / Juejin | none              | public scraping                            | —                                |
+| Platform               | Login command                                 | Mechanism                                                               | Persisted at                                       |
+| ---------------------- | --------------------------------------------- | ----------------------------------------------------------------------- | -------------------------------------------------- |
+| Zhihu                  | `zget login` or `zget zhihu login [--cookie]` | QR code (60s window) or manual cookie import                            | `~/.zget-cli/cookies.json`                         |
+| Bilibili               | `zget bili login`                             | QR code                                                                 | `~/.zget-cli/bili-cookies.json`                    |
+| X (Twitter)            | `zget x login`                                | API credentials (env or interactive)                                    | `~/.zget-cli/x-credentials.json`                   |
+| XHS                    | `zget xhs login`                              | Browser-driven cookie capture (Playwright)                              | `~/.zget-cli/xhs-cookies.json` + `xhs-tokens.json` |
+| Weibo                  | `zget weibo login`                            | QR code or manual cookie                                                | `~/.zget-cli/weibo-cookies.json`                   |
+| Hacker News            | `zget hn login`                               | Browser-driven cookie capture (Playwright) — HN has no API key          | `~/.zget-cli/hn-cookies.json`                      |
+| V2EX                   | `zget v2ex login --cookie <token>`            | Personal Access Token (paste into `--cookie`)                           | `~/.zget-cli/v2ex-token.json`                      |
+| Reddit                 | `zget reddit login --cookie '<json>'`         | OAuth2 script-app credentials (clientId / secret / username / password) | `~/.zget-cli/reddit-credentials.json`              |
+| CSDN / WeChat / Juejin | none                                          | public scraping                                                         | —                                                  |
 
-`--cookies "<raw>"` on any command overrides saved credentials per invocation.
+`--cookies "<raw>"` on any command overrides saved credentials per invocation. `--cookie` (singular) is reserved for the `login` subcommands that import a single platform's session/token.
 
 ### Output schema
 
@@ -206,9 +222,13 @@ Agents SHOULD branch on these:
 ### Limits & known constraints
 
 - **XHS** is driven by headless Chromium (Playwright). Each command spins up a browser; expect 5–15s overhead per call. Page structure is scraped from `__INITIAL_STATE__` and selectors may drift.
+- **Hacker News** uses the same Playwright-driven cookie capture for write actions (HN has no public auth API). Read-only commands (`top`, `search`, `item`, `user`) talk to the Algolia + Firebase APIs directly and do not require a browser.
 - **Zhihu QR login** has a ~60s window; a fresh `zget login` is required if the agent stalls.
 - **X API tier** affects rate limits. The CLI does not retry; the agent should backoff on HTTP 429.
+- **Weibo** image notes (`zget weibo post`) support ≤9 images per call; provide each path via repeated `--image`.
 - **Image notes (XHS)** support 1–18 images per call; provide each path via repeated `--image`.
+- **V2EX** PAT scopes determine which write commands work — if `v2ex thank-*` returns 403 the token is missing the necessary scope.
+- **Reddit** OAuth2 password-grant does not issue refresh tokens — on expiry the CLI re-exchanges using the saved client_id/secret/username/password.
 
 ### Composability
 
@@ -236,17 +256,24 @@ Updating a flag in one place without the others will fail `pnpm docs:check`.
 
 All user data lives under `~/.zget-cli/`:
 
-| File                 | Purpose                     |
-| -------------------- | --------------------------- |
-| `cookies.json`       | Zhihu cookies               |
-| `bili-cookies.json`  | Bilibili cookies            |
-| `xhs-cookies.json`   | XHS cookies                 |
-| `xhs-tokens.json`    | XHS auth tokens             |
-| `x-credentials.json` | X (Twitter) API credentials |
-| `ai-config.json`     | AI provider config          |
-| `state/`             | Batch download resume state |
+| File                               | Purpose                                                                       |
+| ---------------------------------- | ----------------------------------------------------------------------------- |
+| `cookies.json`                     | Zhihu cookies                                                                 |
+| `bili-cookies.json`                | Bilibili cookies                                                              |
+| `xhs-cookies.json`                 | XHS cookies                                                                   |
+| `xhs-tokens.json`                  | XHS auth tokens                                                               |
+| `x-credentials.json`               | X (Twitter) API credentials                                                   |
+| `weibo-cookies.json`               | Weibo cookies                                                                 |
+| `hn-cookies.json`                  | Hacker News cookies (write actions only)                                      |
+| `v2ex-token.json`                  | V2EX Personal Access Token                                                    |
+| `reddit-credentials.json`          | Reddit OAuth2 script-app credentials                                          |
+| `ai-config.json`                   | AI provider config                                                            |
+| `downloads/` (state)               | Batch download resume state                                                   |
+| `login_qrcode.png`                 | Last rendered QR code for QR-based logins                                     |
+| `douban-cookies.json` _(reserved)_ | Reserved for in-development Douban support — not yet used by any CLI command  |
+| `bsky-session.json` _(reserved)_   | Reserved for in-development Bluesky support — not yet used by any CLI command |
 
-XHS auth/scraping is **Playwright-driven** (`source/core/api/xhs-browser.ts`) — each XHS call boots headless Chromium (5–15s overhead). Selectors scrape `__INITIAL_STATE__` and may drift when XHS updates.
+XHS and Hacker News auth/scraping are **Playwright-driven** (`source/core/api/xhs-browser.ts`, `source/core/api/hn-browser.ts`) — each call to a write-action subcommand boots headless Chromium (5–15s overhead). Selectors scrape page state and may drift when the upstream UI changes.
 
 ### XO/ESLint specifics
 
@@ -277,5 +304,5 @@ Tag-driven (`v*.*.*`) via `.github/workflows/release.yml`:
 
 - **New flag**: add to `cliFlags` in `source/cli-metadata.ts` → wire in `cliParserFlags` in `source/cli.tsx` → propagate through `ResolvedCommand` if the command needs it → run `pnpm docs:generate`.
 - **New command**: see "Architecture → Runtime flow" above (4 places).
-- **New platform**: add `Platform` variant + regex in `source/core/utils/url-parser.ts`, then implement under `source/core/api/`, `source/core/auth/` (if auth needed), `source/core/parser/platforms/`, `source/core/downloader/platforms/`, then commands and routing.
+- **New platform**: add `Platform` variant + regex in `source/core/utils/url-parser.ts`, declare the cookie/token file in `source/core/utils/config.ts`, then implement under `source/core/api/`, `source/core/auth/` (if auth needed), `source/core/parser/platforms/`, `source/core/downloader/platforms/`, hook into `source/core/account/platform-probes.ts` + `platform-actions.ts` so the account center sees it, then add the command components and routing branch. The Douban / Bluesky stubs in `url-parser.ts` and `account/` are the current template for this flow.
 - **Generated docs**: never hand-edit `docs/reference/`. Run `pnpm docs:generate` and commit the diff.

@@ -6,11 +6,13 @@ This document explains the current CLI architecture and extension strategy.
 
 1. User executes `dist/cli.js`
 2. `source/cli.tsx` reads shared CLI metadata from `source/cli-metadata.ts`
-3. `meow` parses arguments using the shared contract
-4. Empty positional input resolves to the interactive home; explicit commands keep their existing routing behavior
-5. Parsed flags are transformed into app props
-6. `render(<App ... />)` mounts Ink UI
-7. `source/app.tsx` returns terminal output
+3. `normalizeCliArgv()` reorders flags before positional args so platform-namespaced subcommands like `zget xhs post "title" --image foo.jpg` parse cleanly
+4. `meow` parses arguments using the shared contract
+5. `resolveCommand()` dispatches by family: `x`, `bili`, `weibo`, `hn`, `v2ex`, `reddit`, `xhs`, `summary`, `zhihu` (namespaced verbs), then top-level Zhihu browse/download verbs, then `parseUrl()` auto-detection
+6. Empty positional input resolves to the interactive home; explicit commands keep their existing routing behavior
+7. Parsed flags are transformed into app props (`ResolvedCommand`)
+8. `render(<App ... />)` mounts Ink UI
+9. `source/app.tsx` routes `ResolvedCommand.command` to the matching Ink component
 
 ## Separation of Concerns
 

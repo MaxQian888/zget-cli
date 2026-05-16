@@ -6,14 +6,12 @@ This document defines how continuous integration and release conventions should 
 
 - Quality workflow: `.github/workflows/ci.yml`
 - Release workflow: `.github/workflows/release.yml`
-- Go lint workflow: `.github/workflows/go-lint.yml`
 
 ### Trigger Strategy
 
 - `CI`: push to `main` / `master`
 - `CI`: pull requests targeting the default branch
 - `Release`: push tags matching `v*.*.*`
-- `Go Lint`: push / pull request, only runs `golangci-lint` when at least one `go.mod` exists
 
 ### CI Pipeline Steps
 
@@ -42,13 +40,6 @@ This document defines how continuous integration and release conventions should 
 6. Archive `dist/` as a release asset
 7. Publish the package to npm using `NPM_TOKEN`
 8. Create or update the GitHub Release and upload both assets
-
-### Go Lint Pipeline Steps
-
-1. Checkout repository
-2. Detect whether the repo currently contains any Go modules
-3. If `go.mod` exists, run `golangci-lint` inside the official Docker image for each module
-4. If no Go module exists, skip the lint job without failing the Node.js pipeline
 
 ## Branch Protection Recommendations
 
